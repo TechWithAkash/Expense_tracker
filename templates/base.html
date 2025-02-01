@@ -85,32 +85,7 @@
     </main>
 
     <!-- Footer -->
-    {% if request.endpoint not in ['login', 'register'] %}
-    <footer class="bg-white shadow-lg mt-12">
-        <div class="max-w-7xl mx-auto py-8 px-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">About FinTrack</h3>
-                    <p class="text-gray-600">Your personal finance companion for smart expense tracking and budget management.</p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Links</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{{ url_for('dashboard') }}" class="text-gray-600 hover:text-blue-500">Dashboard</a></li>
-                        <li><a href="{{ url_for('add_expense') }}" class="text-gray-600 hover:text-blue-500">Add Expense</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Contact</h3>
-                    <p class="text-gray-600">Need help? Contact us at support@fintrack.com</p>
-                </div>
-            </div>
-            <div class="mt-8 pt-8 border-t border-gray-200 text-center">
-                <p class="text-gray-500">&copy; {{ now.year }} FinTrack. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-    {% endif %}
+   
 
     <!-- Add this at the end of your base.html template, just before the closing body tag -->
 <div id="deleteConfirmationModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">

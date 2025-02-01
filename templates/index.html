@@ -1,38 +1,172 @@
-
 <!-- templates/index.html -->
 {% extends "base.html" %}
-{% block title %}Welcome{% endblock %}
+{% block title %}Welcome to ExpenseTracker{% endblock %}
+
 {% block content %}
-<div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-    <div class="max-w-7xl mx-auto px-4 py-16 sm:py-24">
-        <div class="text-center">
-            <h1 class="text-4xl sm:text-6xl font-bold mb-8">Take Control of Your Finances</h1>
-            <p class="text-xl sm:text-2xl mb-12">Track expenses, analyze spending patterns, and achieve your financial goals.</p>
-            <div class="space-x-4">
-                <a href="{{ url_for('register') }}" class="bg-white text-blue-600 px-8 py-3 rounded-md font-semibold hover:bg-gray-100 transition duration-300">Get Started</a>
-                <a href="{{ url_for('login') }}" class="border-2 border-white text-white px-8 py-3 rounded-md font-semibold hover:bg-white hover:text-blue-600 transition duration-300">Login</a>
+<!-- Hero Section -->
+<div class="bg-gradient-to-r from-blue-600 to-blue-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="py-20 md:py-28">
+            <div class="text-center">
+                <h1 class="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
+                    <span class="block">Take Control of Your</span>
+                    <span class="block text-blue-200">Financial Future</span>
+                </h1>
+                <p class="mt-3 max-w-md mx-auto text-base text-blue-100 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                    Track your expenses, analyze spending patterns, and make informed financial decisions with our powerful expense management tool.
+                </p>
+                <div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+                    <div class="rounded-md shadow">
+                        <a href="{{ url_for('register') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 md:py-4 md:text-lg md:px-10">
+                            Get Started
+                        </a>
+                    </div>
+                    <div class="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+                        <a href="{{ url_for('login') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 md:py-4 md:text-lg md:px-10">
+                            Login
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="max-w-7xl mx-auto px-4 py-16">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="text-center p-6">
-            <i class="fas fa-chart-line text-5xl text-blue-500 mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">Track Expenses</h3>
-            <p class="text-gray-600">Easily log and categorize your daily expenses</p>
+<!-- Features Section -->
+<div class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                Why Choose ExpenseTracker?
+            </h2>
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
+                Everything you need to manage your finances effectively in one place.
+            </p>
         </div>
-        <div class="text-center p-6">
-            <i class="fas fa-brain text-5xl text-blue-500 mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">Smart Insights</h3>
-            <p class="text-gray-600">Get AI-powered insights about your spending habits</p>
-        </div>
-        <div class="text-center p-6">
-            <i class="fas fa-mobile-alt text-5xl text-blue-500 mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">Voice Input</h3>
-            <p class="text-gray-600">Log expenses using voice commands</p>
+
+        <div class="mt-20">
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                <!-- Feature 1 -->
+                <div class="flex flex-col items-center">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-chart-line text-2xl"></i>
+                    </div>
+                    <h3 class="mt-6 text-xl font-medium text-gray-900">Expense Tracking</h3>
+                    <p class="mt-2 text-base text-gray-500 text-center">
+                        Easily track your daily expenses and categorize them for better organization.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="flex flex-col items-center">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-chart-pie text-2xl"></i>
+                    </div>
+                    <h3 class="mt-6 text-xl font-medium text-gray-900">Visual Analytics</h3>
+                    <p class="mt-2 text-base text-gray-500 text-center">
+                        Get insights through interactive charts and detailed spending analysis.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="flex flex-col items-center">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-bell text-2xl"></i>
+                    </div>
+                    <h3 class="mt-6 text-xl font-medium text-gray-900">Smart Alerts</h3>
+                    <p class="mt-2 text-base text-gray-500 text-center">
+                        Stay informed with customizable alerts and spending notifications.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Stats Section -->
+<div class="bg-blue-800">
+    <div class="max-w-7xl mx-auto py-12 px-4 sm:py-16 sm:px-6 lg:px-8 lg:py-20">
+        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="text-center">
+                <div class="text-4xl font-extrabold text-white">30K+</div>
+                <div class="mt-2 text-sm text-blue-200">Active Users</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-extrabold text-white">₹10M+</div>
+                <div class="mt-2 text-sm text-blue-200">Expenses Tracked</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-extrabold text-white">15+</div>
+                <div class="mt-2 text-sm text-blue-200">Categories</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-extrabold text-white">99%</div>
+                <div class="mt-2 text-sm text-blue-200">Customer Satisfaction</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="bg-white">
+    <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+        <div class="bg-blue-700 rounded-lg shadow-xl overflow-hidden">
+            <div class="pt-10 pb-12 px-6 sm:pt-16 sm:px-16 lg:py-16 lg:pr-0 xl:py-20 xl:px-20">
+                <div class="lg:self-center lg:max-w-2xl">
+                    <h2 class="text-3xl font-extrabold text-white sm:text-4xl">
+                        <span class="block">Ready to take control?</span>
+                        <span class="block">Start tracking today.</span>
+                    </h2>
+                    <p class="mt-4 text-lg leading-6 text-blue-200">
+                        Join thousands of users who are already managing their finances better with ExpenseTracker.
+                    </p>
+                    <a href="{{ url_for('register') }}" class="mt-8 bg-white border border-transparent rounded-md shadow px-6 py-3 inline-flex items-center text-base font-medium text-blue-600 hover:bg-blue-50">
+                        Sign up for free
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-50">
+    <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+            <div>
+                <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Product</h3>
+                <ul class="mt-4 space-y-4">
+                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Features</a></li>
+                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Pricing</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Support</h3>
+                <ul class="mt-4 space-y-4">
+                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Documentation</a></li>
+                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Company</h3>
+                <ul class="mt-4 space-y-4">
+                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">About</a></li>
+                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Blog</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Legal</h3>
+                <ul class="mt-4 space-y-4">
+                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Privacy</a></li>
+                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Terms</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="mt-8 border-t border-gray-200 pt-8">
+            <p class="text-base text-gray-400 text-center">
+                &copy; 2024 FinTrack. All rights reserved.
+            </p>
+        </div>
+    </div>
+</footer>
 {% endblock %}
