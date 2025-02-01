@@ -1,0 +1,38 @@
+
+<!-- templates/index.html -->
+{% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
+{% block content %}
+<div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 py-16 sm:py-24">
+        <div class="text-center">
+            <h1 class="text-4xl sm:text-6xl font-bold mb-8">Take Control of Your Finances</h1>
+            <p class="text-xl sm:text-2xl mb-12">Track expenses, analyze spending patterns, and achieve your financial goals.</p>
+            <div class="space-x-4">
+                <a href="{{ url_for('register') }}" class="bg-white text-blue-600 px-8 py-3 rounded-md font-semibold hover:bg-gray-100 transition duration-300">Get Started</a>
+                <a href="{{ url_for('login') }}" class="border-2 border-white text-white px-8 py-3 rounded-md font-semibold hover:bg-white hover:text-blue-600 transition duration-300">Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 py-16">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center p-6">
+            <i class="fas fa-chart-line text-5xl text-blue-500 mb-4"></i>
+            <h3 class="text-xl font-semibold mb-2">Track Expenses</h3>
+            <p class="text-gray-600">Easily log and categorize your daily expenses</p>
+        </div>
+        <div class="text-center p-6">
+            <i class="fas fa-brain text-5xl text-blue-500 mb-4"></i>
+            <h3 class="text-xl font-semibold mb-2">Smart Insights</h3>
+            <p class="text-gray-600">Get AI-powered insights about your spending habits</p>
+        </div>
+        <div class="text-center p-6">
+            <i class="fas fa-mobile-alt text-5xl text-blue-500 mb-4"></i>
+            <h3 class="text-xl font-semibold mb-2">Voice Input</h3>
+            <p class="text-gray-600">Log expenses using voice commands</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
