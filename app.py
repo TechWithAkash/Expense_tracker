@@ -5,13 +5,19 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import pymongo
 from bson import ObjectId
+from dotenv import load_dotenv
+#Loaded the environment variables
+load_dotenv()
+
+# Get the MongoDBURL from the environment   variable
+MONGODB_URI = os.getenv("MONGODB_URI")
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 # MongoDB connection with timeout parameters
 try:
-    client = pymongo.MongoClient("mongodb://localhost:27017/", 
+    client = pymongo.MongoClient(MONGODB_URI, 
                                 serverSelectionTimeoutMS=5000,
                                 connectTimeoutMS=5000)
     client.admin.command('ping')
@@ -69,36 +75,6 @@ def index():
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
     return render_template('index.html')
-
-# @app.route('/dashboard')
-# @login_required
-# def dashboard():
-#     user_id = session['user_id']
-#     user = users_collection.find_one({'_id': ObjectId(user_id)})
-#     expenses = list(expenses_collection.find({'user_id': user_id}).sort('date', -1))
-
-#     # Ensure date formatting
-#     for expense in expenses:
-#         if isinstance(expense['date'], datetime):
-#             expense['date'] = expense['date'].strftime('%Y-%m-%d')
-
-#     total_spent = sum(expense['amount'] for expense in expenses)
-#     categories = {}
-#     for expense in expenses:
-#         categories[expense['category']] = categories.get(expense['category'], 0) + expense['amount']
-
-#     monthly_totals = {}
-#     for expense in expenses:
-#         month_key = expense['date'][:7]  # Extract YYYY-MM format
-#         monthly_totals[month_key] = monthly_totals.get(month_key, 0) + expense['amount']
-
-#     return render_template('dashboard.html', 
-#                          expenses=expenses, 
-#                          total_spent=total_spent, 
-#                          categories=categories,
-#                          monthly_totals=monthly_totals,
-#                          user=user)
-
 
 
 @app.route('/dashboard')

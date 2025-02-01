@@ -1,10 +1,28 @@
-/venv
-/.env
-# Environments
-.env
-.venv
-env/
+# Ignore the virtual environment folder
 venv/
-ENV/
-env.bak/
-venv.bak/
+env/
+
+# Ignore environment variables file
+.env
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore logs and database files
+*.log
+*.sqlite3
+
+# Ignore VS Code settings (if using VS Code)
+.vscode/
+
+# Ignore Jupyter Notebook checkpoints (if using Jupyter)
+.ipynb_checkpoints/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore PyCharm IDE settings (if using PyCharm)
+.idea/
