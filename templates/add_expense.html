@@ -1,34 +1,91 @@
-
-<!-- Update templates/add_expense.html to include voice recording -->
+<!-- templates/add_expense.html -->
 {% extends "base.html" %}
 {% block title %}Add Expense{% endblock %}
 {% block content %}
-<div class="max-w-md mx-auto bg-white rounded-lg shadow-md">
-    <div class="p-6">
-        <h2 class="text-xl font-semibold mb-4">Add New Expense</h2>
-        <div class="mb-6">
-            <button id="voice-record"
-                class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Record Expense
-            </button>
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Add New Expense</h2>
+            <a href="{{ url_for('dashboard') }}" class="text-blue-500 hover:text-blue-600">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
         </div>
-        <form method="POST" class="space-y-4">
-            <div>
-                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                <input type="text" name="description" id="description" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        
+        <form method="POST" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                        Description *
+                    </label>
+                    <input type="text" name="description" id="description" required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter expense description">
+                </div>
+                
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                        Amount (₹) *
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500">₹</span>
+                        <input type="number" name="amount" id="amount" step="0.01" required
+                            class="w-full pl-8 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="0.00">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                        Category *
+                    </label>
+                    <select name="category" id="category" required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select a category</option>
+                        {% for category in categories %}
+                        <option value="{{ category }}">{{ category|title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="date" class="block text-sm font-medium text-gray-700 mb-2">
+                        Date *
+                    </label>
+                    <input type="date" name="date" id="date" required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        value="{{ now.strftime('%Y-%m-%d') }}">
+                </div>
             </div>
-            <div>
-                <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
-                <input type="number" name="amount" id="amount" step="0.01" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Category Colors</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {% for category in categories %}
+                    <div class="flex items-center space-x-2">
+                        <span class="w-4 h-4 rounded-full inline-block
+                            {% if category == 'food' %}bg-green-500
+                            {% elif category == 'transport' %}bg-blue-500
+                            {% elif category == 'entertainment' %}bg-purple-500
+                            {% elif category == 'utilities' %}bg-yellow-500
+                            {% elif category == 'shopping' %}bg-pink-500
+                            {% elif category == 'healthcare' %}bg-red-500
+                            {% elif category == 'education' %}bg-indigo-500
+                            {% elif category == 'rent' %}bg-orange-500
+                            {% else %}bg-gray-500{% endif %}">
+                        </span>
+                        <span class="text-sm text-gray-600">{{ category|title }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-            <button type="submit"
-                class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Add Expense
-            </button>
+
+            <div class="flex items-center justify-end mt-6">
+                <button type="submit"
+                    class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                    <i class="fas fa-plus-circle mr-2"></i> Add Expense
+                </button>
+            </div>
         </form>
     </div>
 </div>
-<script src="{{ url_for('static', filename='js/voice_recognition.js') }}"></script>
 {% endblock %}

@@ -118,25 +118,56 @@ def dashboard():
     )
 
 
+# @app.route('/add_expense', methods=['GET', 'POST'])
+# @login_required
+# def add_expense():
+#     if request.method == 'POST':
+#         description = request.form['description']
+#         amount = float(request.form['amount'])
+#         category = detect_category(description)
+        
+#         expense = {
+#             'user_id': session['user_id'],
+#             'description': description,
+#             'amount': amount,
+#             'category': category,
+#             'date': datetime.now()
+#         }
+#         expenses_collection.insert_one(expense)
+#         flash('Expense added successfully!', 'success')
+#         return redirect(url_for('dashboard'))
+#     return render_template('add_expense.html',now=datetime.now())
+
+
 @app.route('/add_expense', methods=['GET', 'POST'])
 @login_required
 def add_expense():
     if request.method == 'POST':
         description = request.form['description']
         amount = float(request.form['amount'])
-        category = detect_category(description)
+        category = request.form['category']  # Get category directly from form
+        date = datetime.strptime(request.form['date'], '%Y-%m-%d')
         
         expense = {
             'user_id': session['user_id'],
             'description': description,
             'amount': amount,
-            'category': category,
-            'date': datetime.now()
+            'category': category,  # Use the selected category
+            'date': date
         }
+        
         expenses_collection.insert_one(expense)
         flash('Expense added successfully!', 'success')
         return redirect(url_for('dashboard'))
-    return render_template('add_expense.html')
+        
+    # Get predefined categories for the form
+    categories = [
+        'food', 'transport', 'entertainment', 
+        'utilities', 'shopping', 'healthcare',
+        'education', 'rent', 'other'
+    ]
+    return render_template('add_expense.html', categories=categories,now = datetime.now())
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -187,6 +218,63 @@ def inject_globals():
         'user_stats': get_user_stats(),
         'now': datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Fixed issue
     }
+
+
+
+# Add these new routes to your app.py
+
+@app.route('/delete_expense/<expense_id>')
+@login_required
+def delete_expense(expense_id):
+    user_id = session['user_id']
+    # Verify the expense belongs to the user before deleting
+    expense = expenses_collection.find_one({
+        '_id': ObjectId(expense_id),
+        'user_id': user_id
+    })
+    
+    if expense:
+        expenses_collection.delete_one({'_id': ObjectId(expense_id)})
+        flash('Expense deleted successfully!', 'success')
+    else:
+        flash('Expense not found or unauthorized!', 'error')
+    
+    return redirect(url_for('dashboard'))
+
+@app.route('/edit_expense/<expense_id>', methods=['GET', 'POST'])
+@login_required
+def edit_expense(expense_id):
+    user_id = session['user_id']
+    expense = expenses_collection.find_one({
+        '_id': ObjectId(expense_id),
+        'user_id': user_id
+    })
+    
+    if not expense:
+        flash('Expense not found or unauthorized!', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        description = request.form['description']
+        amount = float(request.form['amount'])
+        category = request.form['category']
+        date = datetime.strptime(request.form['date'], '%Y-%m-%d')
+        
+        expenses_collection.update_one(
+            {'_id': ObjectId(expense_id)},
+            {
+                '$set': {
+                    'description': description,
+                    'amount': amount,
+                    'category': category,
+                    'date': date
+                }
+            }
+        )
+        flash('Expense updated successfully!', 'success')
+        return redirect(url_for('dashboard'))
+        
+    return render_template('edit_expense.html', expense=expense)
 
 if __name__ == '__main__':
     app.run(debug=True)
