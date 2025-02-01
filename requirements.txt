@@ -6,4 +6,4 @@ google-generativeai==0.1.0
 python-dateutil==2.8.2
 gunicorn
 pymongo
-pymongo[srv]==4.3.3
+pymongo[srv]
