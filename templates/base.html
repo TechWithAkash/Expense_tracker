@@ -18,6 +18,8 @@
         </style>
     </head>
     <body class="bg-gray-50 min-h-screen flex flex-col">
+        {% if request.endpoint not in ['login', 'register'] %}
+
         <!-- Navbar -->
         <nav class="bg-white shadow-lg">
             <div class="max-w-7xl mx-auto px-4">
@@ -65,7 +67,7 @@
             </div>
         </div>
     </nav>
-
+    {% endif %}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -83,6 +85,7 @@
     </main>
 
     <!-- Footer -->
+    {% if request.endpoint not in ['login', 'register'] %}
     <footer class="bg-white shadow-lg mt-12">
         <div class="max-w-7xl mx-auto py-8 px-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -107,6 +110,8 @@
             </div>
         </div>
     </footer>
+    {% endif %}
+
     <!-- Add this at the end of your base.html template, just before the closing body tag -->
 <div id="deleteConfirmationModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
