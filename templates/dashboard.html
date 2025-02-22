@@ -70,6 +70,24 @@ content %}
     </div>
   </div>
 
+<!-- Add this section where you want AI insights 
+<div class="bg-white p-6 rounded-lg shadow-md mb-8">
+  <div class="flex items-center gap-3 mb-4">
+      <i class="fas fa-robot text-2xl text-blue-500"></i>
+      <h3 class="text-xl font-bold">Your Personal Finance AI</h3>
+  </div>
+  
+  <div id="aiAdviceContainer">
+      <div class="animate-pulse bg-gray-100 h-32 rounded-lg"></div>
+  </div>
+  
+  <div class="mt-4 text-sm text-gray-600 text-right">
+      <button onclick="refreshAdvice()" class="text-blue-500 hover:text-blue-700">
+          <i class="fas fa-sync-alt mr-2"></i>Refresh Insights
+      </button>
+  </div>
+</div>
+-->
   <!-- Recent Expenses -->
   <div class="bg-white rounded-lg shadow-sm">
     <div class="p-6">
@@ -229,4 +247,40 @@ content %}
       });
   });
 </script>
+
+<script>
+  async function loadAIInsights() {
+      const container = document.getElementById('aiInsightsContent');
+      container.innerHTML = `<div class="animate-pulse bg-gray-100 h-24 rounded-lg"></div>`;
+      
+      try {
+          const response = await fetch('/ai-insights');
+          const data = await response.json();
+          
+          container.innerHTML = `
+              <div class="prose">
+                  ${formatAIResponse(data.insights)}
+              </div>
+              <div class="mt-4 text-sm text-gray-600">
+                  Analysis based on ${data.context.expense_count || 0} transactions
+              </div>
+          `;
+      } catch {
+          container.innerHTML = `<div class="text-red-500">Insights temporarily unavailable</div>`;
+      }
+  }
+  
+  function formatAIResponse(text) {
+      // Convert response markers to visual elements
+      return text
+          .replace(/- 📈/g, '📈')
+          .replace(/- 💡/g, '💡')
+          .replace(/- 🛑/g, '🛑')
+          .replace(/- 🔄/g, '🔄')
+          .replace(/\n/g, '<br>');
+  }
+  
+  // Initial load
+  loadAIInsights();
+  </script>
 {% endblock %}

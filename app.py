@@ -2,26 +2,48 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 from functools import wraps
 import os
 from werkzeug.utils import secure_filename
-
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import pymongo
 from bson import ObjectId
 from dotenv import load_dotenv
-#Loaded the environment variables
+# import google.generativeai as genai
+import sys
+
+import os
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+# 1. Load environment variables first
 load_dotenv()
 
+# 2. Configure Gemini with error handling
+try:
+    genai.configure(api_key=os.getenv("GOOGLE_GENERATIVE_AI_API_KEY"))
+except Exception as e:
+    print(f"Error configuring AI: {str(e)}")
+    # Handle error appropriately for production
 # Get the MongoDBURL from the environment   variable
+
+
+# 3. Configure the database connection 
 MONGODB_URI = os.getenv("MONGODB_URI")
 
+# 4. Initialize Flask application 
 app = Flask(__name__)
+
+# 5. Set the secret key for session management
 app.secret_key = os.urandom(24)
 
-# Add these configurations after app creation
+
+
+# 6. Add these configurations after app creation
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['DEFAULT_AVATAR'] = 'user-icon.png'  # Add this line
 
+# 7. Create the allowed_file function that will be called when the application needs to check if a file is allowed
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
@@ -38,11 +60,13 @@ except pymongo.errors.ServerSelectionTimeoutError:
     print("Error: Could not connect to MongoDB. Please make sure MongoDB is running.")
     exit(1)
 
-# Jinja2 custom filter for date formatting
+# 8. Jinja2 custom filter for date formatting
+# 
 @app.template_filter('format_date')
 def format_date(date):
     return date.strftime('%Y-%m-%d') if isinstance(date, datetime) else date
 
+# 9. Add the detect_category function to the app.py file so that it can be used in the routes for filtering expenses and category detection
 def detect_category(description):
     description = description.lower()
     categories = {
@@ -58,6 +82,7 @@ def detect_category(description):
             return category
     return 'other'
 
+# 10. Add the get_user_stats function to the app.py file so that it can be used in the routes for user statistics
 def get_user_stats():
     if 'user_id' in session:
         user_id = session['user_id']
@@ -71,6 +96,7 @@ def get_user_stats():
         }
     return None
 
+# 11. Add the login route to the app.py file
 # Login decorator
 def login_required(f):
     @wraps(f)
@@ -80,13 +106,14 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# 12. Redirect the user to the dashboard if they are i.e user already logged in
 @app.route('/')
 def index():
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
     return render_template('index.html')
 
-
+# 13. Redirect to dashboard route when user is logged in and logged out from dashboard route when user is logged out
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -148,7 +175,7 @@ def dashboard():
 #         return redirect(url_for('dashboard'))
 #     return render_template('add_expense.html',now=datetime.now())
 
-
+# 14. Create a new expense with the given name and description and redirect to the dashboard route  when the user is logged in or when the user is not logged in redirect to the login route    
 @app.route('/add_expense', methods=['GET', 'POST'])
 @login_required
 def add_expense():
@@ -178,7 +205,7 @@ def add_expense():
     ]
     return render_template('add_expense.html', categories=categories,now = datetime.now())
 
-
+# 15. Register Route to  Creating an new New user 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -202,6 +229,7 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
+# 16. Login Route to login the user
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -216,11 +244,13 @@ def login():
         flash('Invalid email or password', 'error')
     return render_template('login.html')
 
+# 17. Logout Route to logout the user
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))
 
+# 18. Inject current time into Jinja2 globally
 # Inject current time into Jinja2 globally
 @app.context_processor
 def inject_globals():
@@ -231,8 +261,7 @@ def inject_globals():
 
 
 
-# Add these new routes to your app.py
-
+# 19. Delete the expences of the user of the specified user_id and redirect to the dashboard route
 @app.route('/delete_expense/<expense_id>')
 @login_required
 def delete_expense(expense_id):
@@ -251,6 +280,7 @@ def delete_expense(expense_id):
     
     return redirect(url_for('dashboard'))
 
+# 20. Edit the expense of the user of the specified user_id and redirect to the dashboard route
 @app.route('/edit_expense/<expense_id>', methods=['GET', 'POST'])
 @login_required
 def edit_expense(expense_id):
@@ -286,6 +316,7 @@ def edit_expense(expense_id):
         
     return render_template('edit_expense.html', expense=expense)
 
+# 21. Profile Route to get the profile of the user of the specified user_id
 @app.route('/profile')
 @login_required
 def profile():
@@ -306,6 +337,7 @@ def profile():
         category_distribution=categories,
         expense_count=len(expenses))
 
+# 22. Update the profile of the user of the specified user_id and redirect to the profile route
 @app.route('/update_profile', methods=['POST'])
 @login_required
 def update_profile():
@@ -335,6 +367,7 @@ def update_profile():
     return redirect(url_for('profile'))
 
 
+# 23. Update the password of the user of the specified user_id and redirect to the profile route
 @app.route('/update_password', methods=['POST'])
 @login_required
 def update_password():
@@ -355,6 +388,7 @@ def update_password():
     flash('Password updated successfully!', 'success')
     return redirect(url_for('profile'))
 
+# 24. Upload the avatar of the user of the specified user_id and redirect to the profile route
 @app.route('/upload_avatar', methods=['POST'])
 @login_required
 def upload_avatar():
@@ -402,5 +436,193 @@ def upload_avatar():
         print(f"Avatar upload error: {str(e)}")
     return redirect(url_for('profile'))
 
+
+# 25. AI Insights Route to get the AI insights of the user of the specified user_id
+@app.route('/ai-insights')
+@login_required
+def ai_insights():
+    user_id = session['user_id']
+    expenses = list(expenses_collection.find({'user_id': user_id}))
+    
+    # Prepare data for AI
+    expense_data = "\n".join([
+        f"{e['date'].strftime('%Y-%m-%d')}: ₹{e['amount']} ({e['category']}) - {e['description']}"
+        for e in expenses[-20:]  # Last 20 expenses
+    ])
+    
+    prompt = f"""Analyze this financial data and provide key insights in JSON format:
+    {expense_data}
+    
+    Return JSON format with:
+    - top_spending_category
+    - weekly_trend
+    - potential_savings
+    - risk_alerts
+    - personalized_advice
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        insights = json.loads(response.text.replace('```json', '').replace('```', ''))
+        return jsonify(insights)
+    except Exception as e:
+        return jsonify({
+            "error": "AI insights currently unavailable",
+            "details": str(e)
+        }), 500
+
+# Smart Expense Categorization:
+
+# 26. Create Smart Expense Categorization from a list of Smart Expense Categorizations 
+def detect_category(description):
+    prompt = f"""Categorize this expense description into one of these categories: 
+    food, transport, entertainment, utilities, shopping, healthcare, education, rent, other
+    
+    Description: {description}
+    
+    Respond only with the category name in lowercase."""
+    
+    try:
+        response = model.generate_content(prompt)
+        return response.text.strip().lower()
+    except:
+        return 'other'
+
+#  Financial Assistant Chat Route
+# @app.route('/ai-chat', methods=['POST'])
+# @login_required
+# def ai_chat():
+#     try:
+#         user_id = session['user_id']
+#         user_message = request.json.get('message', '').strip()
+        
+#         if not user_message:
+#             return jsonify({"response": "Please enter a valid message"}), 400
+
+#         # Get financial context
+#         expenses = list(expenses_collection.find({'user_id': user_id}))
+#         total_spent = sum(e['amount'] for e in expenses)
+#         last_expenses = expenses[-5:] if len(expenses) > 5 else expenses
+
+#         prompt = f"""**Financial Context**
+# - Total spent: ₹{total_spent:.2f}
+# - Last expenses:
+# {chr(10).join([f"  • ₹{e['amount']} ({e['category']}) - {e['description']}" for e in last_expenses])}
+
+# **User Question**: {user_message}
+
+# **Response Requirements**:
+# 1. Be concise and specific with numbers when possible
+# 2. Use bullet points for multiple suggestions
+# 3. Always maintain professional tone
+# 4. If unsure, ask clarifying questions"""
+
+#         model = genai.GenerativeModel('gemini-pro')
+#         response = model.generate_content(
+#             prompt,
+#             generation_config=genai.types.GenerationConfig(
+#                 temperature=0.3,
+#                 max_output_tokens=500
+#             )
+#         )
+        
+#         # Handle potential empty response
+#         if not response.text:
+#             return jsonify({"response": "I'm having trouble processing that. Could you rephrase your question?"})
+        
+#         return jsonify({"response": response.text.replace("•", "◦")})  # Replace bullets for consistency
+
+#     except Exception as e:
+#         print(f"AI Chat Error: {str(e)}")
+#         return jsonify({
+#             "response": f"⚠️ Technical Difficulty: {str(e)}. Please try again in a minute."
+#         }), 500
+
+
+
+# 3. Simple AI Chat Route
+
+# 27. Creating an Personal AI Financial Assistent
+# @app.route('/ai-chat', methods=['POST'])
+# @login_required
+# def ai_chat():
+#     try:
+#         user_message = request.json.get('message', '').strip()
+#         if not user_message:
+#             return jsonify({"response": "Please enter a message"}), 400
+            
+#         model = genai.GenerativeModel('gemini-pro')
+#         response = model.generate_content(
+#             f"User asked about finances: {user_message}. Respond helpfully."
+#         )
+#         return jsonify({"response": response.text})
+        
+#     except Exception as e:
+#         print(f"Chat Error: {str(e)}")
+#         return jsonify({"response": "Temporarily unavailable. Please try again later."}), 500
+    
+@app.route('/ai-chat', methods=['POST'])
+@login_required
+def ai_chat():
+    try:
+        user_id = session['user_id']
+        user_message = request.json.get('message', '').strip()
+        
+        # Get user's financial data
+        expenses = list(expenses_collection.find({'user_id': user_id}))
+        if not expenses:
+            return jsonify({"response": "You haven't recorded any expenses yet. Start adding expenses to get insights!"})
+        
+        # Process financial data
+        daily_spending = {}
+        category_spending = {}
+        for e in expenses:
+            date_str = e['date'].strftime('%Y-%m-%d')
+            daily_spending[date_str] = daily_spending.get(date_str, 0) + e['amount']
+            category_spending[e['category']] = category_spending.get(e['category'], 0) + e['amount']
+        
+        # Structure data for AI
+        financial_context = f"""
+        User's Financial Data:
+        - Total expenses: {len(expenses)}
+        - Total amount spent: ₹{sum(e['amount'] for e in expenses):.2f}
+        - Daily spending peaks: {max(daily_spending.values(), default=0):.2f} on {max(daily_spending, key=daily_spending.get, default='N/A')}
+        - Top category: {max(category_spending, key=category_spending.get, default='N/A')} (₹{max(category_spending.values(), default=0):.2f})
+        Last 5 transactions:
+        {chr(10).join([f"₹{e['amount']:.2f} on {e['date'].strftime('%d %b')} - {e['description']}" for e in expenses[-5:]])}
+        """
+        
+        # Create instruction prompt
+        prompt = f"""You are a financial assistant analyzing this data:
+        {financial_context}
+
+        User Question: {user_message}
+
+        Response Guidelines:
+        1. Answer ONLY using the provided data
+        2. Be specific with dates/amounts
+        3. Mention exact numbers from data
+        4. If unsure, say "Not enough data"
+        5. Use ₹ symbol for amounts
+        6. Keep responses under 3 sentences
+
+        Examples:
+        Q: What day did I spend the most?
+        A: Your highest spending was ₹{max(daily_spending.values()):.2f} on {max(daily_spending, key=daily_spending.get)}.
+
+        Q: What's my most frequent category?
+        A: You spend most on {max(category_spending, key=category_spending.get)} (₹{max(category_spending.values()):.2f} total).
+        """
+        
+        # Get AI response
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(prompt)
+        
+        return jsonify({"response": response.text})
+        
+    except Exception as e:
+        print(f"Chat Error: {str(e)}")
+        return jsonify({"response": "Please try again in a moment. Our AI is currently busy."})
+# 28. Run the Flask application
 if __name__ == '__main__':
     app.run(debug=True)
