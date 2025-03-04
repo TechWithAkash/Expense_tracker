@@ -1,6 +1,4 @@
-Here's a professional README.md for your project:
 
-```markdown
 # 💸 FinVision: AI-Powered Financial Intelligence Platform
 
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://python.org)
