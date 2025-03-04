@@ -7,3 +7,4 @@ python-dateutil==2.8.2
 gunicorn
 pymongo
 pymongo[srv]
+flask-limiter

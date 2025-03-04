@@ -8,9 +8,7 @@ from datetime import datetime
 import pymongo
 from bson import ObjectId
 from dotenv import load_dotenv
-# import google.generativeai as genai
 import sys
-
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -36,12 +34,10 @@ app = Flask(__name__)
 # 5. Set the secret key for session management
 app.secret_key = os.urandom(24)
 
-
-
 # 6. Add these configurations after app creation
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
-app.config['DEFAULT_AVATAR'] = 'user-icon.png'  # Add this line
+app.config['DEFAULT_AVATAR'] = 'user-icon.png' 
 
 # 7. Create the allowed_file function that will be called when the application needs to check if a file is allowed
 def allowed_file(filename):
@@ -61,7 +57,6 @@ except pymongo.errors.ServerSelectionTimeoutError:
     exit(1)
 
 # 8. Jinja2 custom filter for date formatting
-# 
 @app.template_filter('format_date')
 def format_date(date):
     return date.strftime('%Y-%m-%d') if isinstance(date, datetime) else date
@@ -488,82 +483,10 @@ def detect_category(description):
     except:
         return 'other'
 
-#  Financial Assistant Chat Route
+# 27. AI-Powered Financial Chat Assistant to get the AI chat of the user of the specified user_id
 # @app.route('/ai-chat', methods=['POST'])
 # @login_required
 # def ai_chat():
-#     try:
-#         user_id = session['user_id']
-#         user_message = request.json.get('message', '').strip()
-        
-#         if not user_message:
-#             return jsonify({"response": "Please enter a valid message"}), 400
-
-#         # Get financial context
-#         expenses = list(expenses_collection.find({'user_id': user_id}))
-#         total_spent = sum(e['amount'] for e in expenses)
-#         last_expenses = expenses[-5:] if len(expenses) > 5 else expenses
-
-#         prompt = f"""**Financial Context**
-# - Total spent: ₹{total_spent:.2f}
-# - Last expenses:
-# {chr(10).join([f"  • ₹{e['amount']} ({e['category']}) - {e['description']}" for e in last_expenses])}
-
-# **User Question**: {user_message}
-
-# **Response Requirements**:
-# 1. Be concise and specific with numbers when possible
-# 2. Use bullet points for multiple suggestions
-# 3. Always maintain professional tone
-# 4. If unsure, ask clarifying questions"""
-
-#         model = genai.GenerativeModel('gemini-pro')
-#         response = model.generate_content(
-#             prompt,
-#             generation_config=genai.types.GenerationConfig(
-#                 temperature=0.3,
-#                 max_output_tokens=500
-#             )
-#         )
-        
-#         # Handle potential empty response
-#         if not response.text:
-#             return jsonify({"response": "I'm having trouble processing that. Could you rephrase your question?"})
-        
-#         return jsonify({"response": response.text.replace("•", "◦")})  # Replace bullets for consistency
-
-#     except Exception as e:
-#         print(f"AI Chat Error: {str(e)}")
-#         return jsonify({
-#             "response": f"⚠️ Technical Difficulty: {str(e)}. Please try again in a minute."
-#         }), 500
-
-
-
-# 3. Simple AI Chat Route
-
-# 27. Creating an Personal AI Financial Assistent
-# @app.route('/ai-chat', methods=['POST'])
-# @login_required
-# def ai_chat():
-#     try:
-#         user_message = request.json.get('message', '').strip()
-#         if not user_message:
-#             return jsonify({"response": "Please enter a message"}), 400
-            
-#         model = genai.GenerativeModel('gemini-pro')
-#         response = model.generate_content(
-#             f"User asked about finances: {user_message}. Respond helpfully."
-#         )
-#         return jsonify({"response": response.text})
-        
-#     except Exception as e:
-#         print(f"Chat Error: {str(e)}")
-#         return jsonify({"response": "Temporarily unavailable. Please try again later."}), 500
-    
-@app.route('/ai-chat', methods=['POST'])
-@login_required
-def ai_chat():
     try:
         user_id = session['user_id']
         user_message = request.json.get('message', '').strip()
@@ -615,7 +538,7 @@ def ai_chat():
         """
         
         # Get AI response
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-pro')  # Updated model name
         response = model.generate_content(prompt)
         
         return jsonify({"response": response.text})
@@ -624,5 +547,295 @@ def ai_chat():
         print(f"Chat Error: {str(e)}")
         return jsonify({"response": "Please try again in a moment. Our AI is currently busy."})
 # 28. Run the Flask application
+
+# AI-Powered Financial Chat Assistant
+# @app.route('/ai-chat', methods=['POST'])
+# @login_required
+# def ai_chat():
+#     try:
+#         user_id = session['user_id']
+#         user_message = request.json.get('message', '').strip()
+        
+#         # Get user's financial data - extended period for better analysis
+#         expenses = list(expenses_collection.find({'user_id': user_id}))
+#         if not expenses:
+#             return jsonify({"response": "You haven't recorded any expenses yet. Start adding expenses to get insights on your financial patterns!"})
+        
+#         # Advanced financial data analysis
+#         total_spent = sum(e['amount'] for e in expenses)
+#         avg_transaction = total_spent / len(expenses) if expenses else 0
+        
+#         # Time-based analysis
+#         now = datetime.now()
+#         expenses_by_date = {}
+#         monthly_spending = {}
+#         weekly_spending = {}
+#         category_spending = {}
+#         recurring_expenses = {}
+        
+#         # Get current month start and end for monthly view
+#         current_month_start = datetime(now.year, now.month, 1)
+#         current_month_end = datetime(now.year, now.month, calendar.monthrange(now.year, now.month)[1])
+        
+#         # Previous month for comparison
+#         if now.month == 1:  # January
+#             prev_month = 12
+#             prev_year = now.year - 1
+#         else:
+#             prev_month = now.month - 1
+#             prev_year = now.year
+            
+#         prev_month_start = datetime(prev_year, prev_month, 1)
+#         prev_month_end = datetime(prev_year, prev_month, calendar.monthrange(prev_year, prev_month)[1])
+        
+#         # Analyze each expense
+#         for e in expenses:
+#             # Daily analysis
+#             date_str = e['date'].strftime('%Y-%m-%d')
+#             expenses_by_date[date_str] = expenses_by_date.get(date_str, 0) + e['amount']
+            
+#             # Monthly analysis
+#             month_str = e['date'].strftime('%Y-%m')
+#             monthly_spending[month_str] = monthly_spending.get(month_str, 0) + e['amount']
+            
+#             # Weekly analysis (Monday as start of week)
+#             week_start = e['date'] - timedelta(days=e['date'].weekday())
+#             week_str = week_start.strftime('%Y-%m-%d')
+#             weekly_spending[week_str] = weekly_spending.get(week_str, 0) + e['amount']
+            
+#             # Category analysis
+#             category_spending[e['category']] = category_spending.get(e['category'], 0) + e['amount']
+            
+#             # Track potential recurring expenses by description
+#             desc_key = e['description'].lower().strip()
+#             if desc_key not in recurring_expenses:
+#                 recurring_expenses[desc_key] = []
+#             recurring_expenses[desc_key].append(e['date'])
+        
+#         # Calculate current month spending
+#         current_month_expenses = [e for e in expenses if current_month_start <= e['date'] <= current_month_end]
+#         current_month_total = sum(e['amount'] for e in current_month_expenses)
+        
+#         # Calculate previous month spending
+#         prev_month_expenses = [e for e in expenses if prev_month_start <= e['date'] <= prev_month_end]
+#         prev_month_total = sum(e['amount'] for e in prev_month_expenses)
+        
+#         # Monthly spending trend (increase/decrease)
+#         monthly_change = 0
+#         if prev_month_total > 0:
+#             monthly_change = ((current_month_total - prev_month_total) / prev_month_total) * 100
+        
+#         # Identify potential recurring expenses (appearing at least twice with similar dates)
+#         potential_subscriptions = []
+#         for desc, dates in recurring_expenses.items():
+#             if len(dates) >= 2:
+#                 # Find expenses that occur on similar days of month
+#                 day_counts = {}
+#                 for date in dates:
+#                     day = date.day
+#                     day_counts[day] = day_counts.get(day, 0) + 1
+                
+#                 # If an expense occurs on similar days of month multiple times
+#                 if any(count >= 2 for count in day_counts.values()):
+#                     matching_expenses = [e for e in expenses if e['description'].lower().strip() == desc]
+#                     amount = matching_expenses[0]['amount'] if matching_expenses else 0
+#                     potential_subscriptions.append({
+#                         'description': desc,
+#                         'amount': amount,
+#                         'occurrences': len(dates)
+#                     })
+        
+#         # Find unusual spending (more than 50% above the average for that category)
+#         unusual_spending = []
+#         for cat, total in category_spending.items():
+#             cat_expenses = [e for e in expenses if e['category'] == cat]
+#             cat_avg = total / len(cat_expenses)
+            
+#             for e in cat_expenses:
+#                 if e['amount'] > (cat_avg * 1.5) and e['amount'] > 500:  # Significant amount over average
+#                     unusual_spending.append({
+#                         'date': e['date'].strftime('%Y-%m-%d'),
+#                         'amount': e['amount'],
+#                         'description': e['description'],
+#                         'category': cat
+#                     })
+        
+#         # Sort unusual spending by amount (highest first)
+#         unusual_spending.sort(key=lambda x: x['amount'], reverse=True)
+        
+#         # Calculate spending frequency
+#         days_with_expenses = len(expenses_by_date)
+#         date_range = (max([e['date'] for e in expenses]) - min([e['date'] for e in expenses])).days + 1
+#         spending_frequency = days_with_expenses / date_range if date_range > 0 else 0
+#         spending_frequency_pct = spending_frequency * 100
+        
+#         # Structure advanced financial insights
+#         financial_context = f"""
+#         USER FINANCIAL PROFILE:
+#         - Total recorded expenses: {len(expenses)}
+#         - Total amount spent: ₹{total_spent:.2f}
+#         - Average transaction: ₹{avg_transaction:.2f}
+#         - Spending frequency: {spending_frequency_pct:.1f}% of days have expenses
+        
+#         MONTHLY INSIGHTS:
+#         - Current month spending: ₹{current_month_total:.2f}
+#         - Previous month spending: ₹{prev_month_total:.2f}
+#         - Month-over-month change: {monthly_change:+.1f}%
+        
+#         SPENDING PATTERNS:
+#         - Highest daily spending: ₹{max(expenses_by_date.values(), default=0):.2f} on {max(expenses_by_date, key=expenses_by_date.get, default='N/A')}
+#         - Top spending category: {max(category_spending, key=category_spending.get, default='N/A')} (₹{max(category_spending.values(), default=0):.2f})
+#         - Category breakdown: {', '.join([f"{k}: ₹{v:.2f}" for k, v in sorted(category_spending.items(), key=lambda item: item[1], reverse=True)[:3]])}
+        
+#         POTENTIAL RECURRING EXPENSES:
+#         {chr(10).join([f"- {sub['description'].title()}: ₹{sub['amount']:.2f} (detected {sub['occurrences']} times)" for sub in potential_subscriptions[:3]])}
+        
+#         UNUSUAL TRANSACTIONS:
+#         {chr(10).join([f"- ₹{unu['amount']:.2f} on {unu['date']} - {unu['description']}" for unu in unusual_spending[:3]])}
+        
+#         RECENT TRANSACTIONS:
+#         {chr(10).join([f"- ₹{e['amount']:.2f} on {e['date'].strftime('%d %b')} - {e['description']}" for e in sorted(expenses, key=lambda x: x['date'], reverse=True)[:5]])}
+#         """
+        
+#         # Create finance-specific prompt with expert knowledge
+#         prompt = f"""You are an expert financial advisor analyzing personal financial data with 15+ years of experience in personal finance and wealth management user can ask anything spedific to finance please answer it wisely and perfectly.
+
+#         USER DATA:
+#         {financial_context}
+
+#         User Question: {user_message}
+
+#         INSTRUCTIONS:
+#         1. Provide professional financial insights strictly based on the user's data
+#         2. Use precise financial terminology while keeping explanations accessible
+#         3. Include specific amounts, dates, and percentages when relevant
+#         4. For spending patterns, highlight areas of concern or optimization
+#         5. For personal finance questions, provide actionable advice based on the data
+#         6. Focus on both short-term patterns and long-term implications
+#         7. Be compassionate about financial situations but factual about the data 
+#         8. If data is insufficient for a complete answer, be transparent about limitations
+#         9. Use ₹ symbol for all monetary values
+#         10. Keep responses concise and focused - typically 2-4 sentences
+        
+#         RESPONSE FORMAT:
+#         - Start with a direct answer to the question
+#         - Follow with 1-2 insights from the data
+#         - End with a brief, actionable recommendation if appropriate
+#         """
+        
+#         # Get AI response
+#         model = genai.GenerativeModel('gemini-1.5-pro')
+#         generation_config = {
+#             "temperature": 0.2,  # Lower temperature for more focused, professional responses
+#             "top_p": 0.95,
+#             "top_k": 40,
+#             "max_output_tokens": 200,  # Keep responses concise
+#         }
+        
+#         response = model.generate_content(
+#             prompt,
+#             generation_config=generation_config
+#         )
+        
+#         return jsonify({"response": response.text})
+        
+#     except Exception as e:
+#         print(f"Chat Error: {str(e)}")
+        
+#         # Provide intelligent fallback responses based on the question
+#         try:
+#             if "what is finance" in user_message.lower():
+#                 return jsonify({"response": "Finance is the management of money, investments, and other assets. Looking at your data, you have expenses across various categories, with your highest spending in " + max(category_spending, key=category_spending.get, default='N/A') + "."})
+            
+#             elif any(word in user_message.lower() for word in ["budget", "spending", "spend", "spent"]):
+#                 return jsonify({"response": f"Your total spending is ₹{total_spent:.2f} across {len(expenses)} transactions. Your highest spending category is {max(category_spending, key=category_spending.get, default='N/A')} at ₹{max(category_spending.values(), default=0):.2f}."})
+            
+#             elif any(word in user_message.lower() for word in ["category", "expense", "expenses"]):
+#                 categories = sorted(category_spending.items(), key=lambda x: x[1], reverse=True)
+#                 return jsonify({"response": f"Your top 3 spending categories are: {categories[0][0]} (₹{categories[0][1]:.2f}), {categories[1][0]} (₹{categories[1][1]:.2f}), and {categories[2][0]} (₹{categories[2][1]:.2f})."})
+            
+#             elif any(word in user_message.lower() for word in ["trend", "pattern", "increase", "decrease"]):
+#                 trend_msg = f"Your spending has {'increased' if monthly_change > 0 else 'decreased'} by {abs(monthly_change):.1f}% compared to last month."
+#                 return jsonify({"response": trend_msg})
+            
+#             else:
+#                 return jsonify({"response": f"Based on your {len(expenses)} recorded expenses totaling ₹{total_spent:.2f}, you spend most frequently on {max(category_spending, key=category_spending.get, default='N/A')}. I can analyze trends, categories, and specific expense patterns if you'd like more detailed insights."})
+                
+#         except Exception:
+#             # Ultimate fallback if even the fallbacks fail
+#             return jsonify({"response": "I'm analyzing your financial data. Could you please try a more specific question about your spending, categories, or financial trends?"})
+
+
+@app.route('/ai-chat', methods=['POST'])
+@login_required
+def ai_chat():
+    """
+    AI-powered financial chat route for FinTrack
+    
+    Returns:
+        JSON response with financial insights
+    """
+    try:
+        # Get user information and message
+        user_id = session['user_id']
+        user_message = request.json.get('message', '').strip()
+        
+        # Fetch user's expenses
+        expenses = list(expenses_collection.find({'user_id': user_id}))
+        
+        # Handle no expenses scenario
+        if not expenses:
+            return jsonify({
+                "response": "Welcome to FinTrack! You haven't recorded any expenses yet. Start tracking your spending to get personalized financial insights."
+            })
+        
+        # Convert dates if needed
+        for expense in expenses:
+            if not isinstance(expense['date'], datetime):
+                expense['date'] = datetime.fromisoformat(str(expense['date']))
+        
+        # Prepare financial context
+        total_spent = sum(e['amount'] for e in expenses)
+        category_spending = {}
+        for e in expenses:
+            category_spending[e['category']] = category_spending.get(e['category'], 0) + e['amount']
+        
+        # Sort categories by spending
+        sorted_categories = sorted(category_spending.items(), key=lambda x: x[1], reverse=True)
+        
+        # Create prompt for AI model
+        prompt = f"""
+        Financial Context:
+        - Total Expenses: ₹{total_spent:.2f}
+        - Top Categories: {', '.join([f"{cat}: ₹{amount:.2f}" for cat, amount in sorted_categories[:3]])}
+        - Total Transactions: {len(expenses)}
+
+        User Query: {user_message}
+
+        Provide a concise, helpful financial insight or advice based on the context and query.
+        """
+        
+        # Generate AI response
+        model = genai.GenerativeModel('gemini-1.5-pro')
+        generation_config = {
+            "temperature": 0.2,
+            "max_output_tokens": 200
+        }
+        
+        response = model.generate_content(
+            prompt,
+            generation_config=generation_config
+        )
+        
+        return jsonify({"response": response.text})
+    
+    except Exception as e:
+        # Simple error handling
+        app.logger.error(f"FinTrack AI Chat Error: {e}")
+        
+        return jsonify({
+            "response": "I'm having trouble processing your request. Could you please try again?"
+        })
+
 if __name__ == '__main__':
     app.run(debug=True)
