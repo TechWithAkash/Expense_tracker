@@ -129,7 +129,7 @@ graph TD
 Distributed under MIT License. See `LICENSE` for details.
 
 ## ✉ Contact
-Project Maintainer - [Your Name](mailto:vishwakarmaakashav17@gmail.com)
+Project Maintainer - [Akash Vishwakarma](mailto:vishwakarmaakashav17@gmail.com)
 
 ---
 
