@@ -1,5 +1,5 @@
 
-# 💸 FinVision: AI-Powered Financial Intelligence Platform
+# 💸 FinTrack: AI-Powered Financial Intelligence Platform
 
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
@@ -42,8 +42,8 @@ Transform raw spending data into actionable intelligence with our AI-enhanced ex
 ### Installation
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/finvision.git
-cd finvision
+git clone https://github.com/TechWithAkash/Expense_tracker.git
+cd Expense_tracker
 
 # Create virtual environment
 python -m venv venv
@@ -129,9 +129,9 @@ graph TD
 Distributed under MIT License. See `LICENSE` for details.
 
 ## ✉ Contact
-Project Maintainer - [Your Name](mailto:your.email@example.com)
+Project Maintainer - [Your Name](mailto:vishwakarmaakashav17@gmail.com)
 
 ---
 
 **Empowering Financial Literacy Through AI Innovation**  
-*© 2023 FinVision - Transforming Financial Data into Strategic Advantage*
+*© 2023 FinTrack - Transforming Financial Data into Strategic Advantage*
