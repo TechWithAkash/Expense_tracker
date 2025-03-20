@@ -26,3 +26,4 @@ __pycache__/
 
 # Ignore PyCharm IDE settings (if using PyCharm)
 .idea/
+.qodo

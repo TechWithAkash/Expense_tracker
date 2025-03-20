@@ -1,20 +1,38 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from functools import wraps
 import os
+import smtplib
+import random
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime,timedelta
 import pymongo
 from bson import ObjectId
 from dotenv import load_dotenv
 import sys
 import os
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import google.generativeai as genai
 from dotenv import load_dotenv
-
+import logging
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+import pandas as pd
+from io import BytesIO
+from io import BytesIO
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 # 1. Load environment variables first
 load_dotenv()
+
 
 # 2. Configure Gemini with error handling
 try:
@@ -31,8 +49,18 @@ MONGODB_URI = os.getenv("MONGODB_URI")
 # 4. Initialize Flask application 
 app = Flask(__name__)
 
+
 # 5. Set the secret key for session management
 app.secret_key = os.urandom(24)
+
+# 6. Configure Flask-Limiter
+# Replace the existing Limiter configuration with this:
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["5 per minute", "100 per hour"],
+    storage_uri="memory://"
+)
 
 # 6. Add these configurations after app creation
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -201,6 +229,29 @@ def add_expense():
     return render_template('add_expense.html', categories=categories,now = datetime.now())
 
 # 15. Register Route to  Creating an new New user 
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':
+#         email = request.form['email']
+#         password = request.form['password']
+#         name = request.form['name']
+        
+#         if users_collection.find_one({'email': email}):
+#             flash('Email already exists', 'error')
+#             return redirect(url_for('register'))
+        
+#         hashed_password = generate_password_hash(password)
+#         user = {
+#             'email': email,
+#             'password': hashed_password,
+#             'name': name,
+#             'created_at': datetime.now()
+#         }
+#         users_collection.insert_one(user)
+#         flash('Registration successful! Please login.', 'success')
+#         return redirect(url_for('login'))
+#     return render_template('register.html')
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -212,17 +263,109 @@ def register():
             flash('Email already exists', 'error')
             return redirect(url_for('register'))
         
-        hashed_password = generate_password_hash(password)
-        user = {
+        otp = random.randint(100000, 999999)
+        send_otp(email, otp)
+        session['otp'] = otp
+        session['temp_user'] = {
             'email': email,
-            'password': hashed_password,
+            'password': generate_password_hash(password),
             'name': name,
             'created_at': datetime.now()
         }
-        users_collection.insert_one(user)
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('login'))
+        return redirect(url_for('verify_otp'))
     return render_template('register.html')
+
+# @app.route('/verify_otp', methods=['GET', 'POST'])
+# @limiter.limit("10 per minute")
+# def verify_otp():
+#     session["otp_attempts"] = session.get('otp_attempts', 0) + 1
+#     if session["otp_attempts"] > 10:
+#         flash('Too many attempts. Please try again later.', 'error')
+#         return redirect(url_for('register'))
+#     if request.method == 'POST':
+#         if datetime.now() > session.get('otp_expiry', datetime.min):
+#             flash('OTP expired. Please try again.', 'error')
+#             return redirect(url_for('register'))
+
+#         user_otp = request.form['otp']
+#         if 'otp' in session and int(user_otp) == session['otp']:
+#             user = session.pop('temp_user')
+#             users_collection.insert_one(user)
+#             flash('Registration successful! Please login.', 'success')
+#             return redirect(url_for('login'))
+#         else:
+#             flash('Invalid OTP', 'error')
+#     return render_template('verify_otp.html')
+# def send_otp(email, otp):
+#     sender_email = "vishwakarmaakashav17@gmail.com"
+#     sender_password = "pfjk vvcd hljm xvcs"  # Use the App Password here
+#     receiver_email = email
+
+#     message = MIMEMultipart("alternative")
+#     message["Subject"] = "Your OTP Code"
+#     message["From"] = sender_email
+#     message["To"] = receiver_email
+
+#     text = f"Your OTP code is {otp}"
+#     part = MIMEText(text, "plain")
+#     message.attach(part)
+#     session['otp_expiry'] = datetime.now() + timedelta(minutes=10) # OTP expires in 10 minutes
+
+#     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+#         server.login(sender_email, sender_password)
+#         server.sendmail(sender_email, receiver_email, message.as_string())
+
+# Modify the send_otp function
+def send_otp(email, otp):
+    sender_email = os.getenv("SENDER_EMAIL")
+    sender_password = os.getenv("SENDER_APP_PASSWORD")
+    receiver_email = email
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "Your OTP Code"
+    message["From"] = sender_email
+    message["To"] = receiver_email
+
+    text = f"Your OTP code is {otp}"
+    part = MIMEText(text, "plain")
+    message.attach(part)
+
+    # Store expiry time as string
+    expiry_time = (datetime.now() + timedelta(minutes=10)).replace(microsecond=0)
+    session['otp_expiry'] = expiry_time.isoformat()
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, receiver_email, message.as_string())
+
+# Modify the verify_otp route
+@app.route('/verify_otp', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
+def verify_otp():
+    session["otp_attempts"] = session.get('otp_attempts', 0) + 1
+    if session["otp_attempts"] > 10:
+        flash('Too many attempts. Please try again later.', 'error')
+        return redirect(url_for('register'))
+        
+    if request.method == 'POST':
+        # Get current time and expiry time
+        current_time = datetime.now().replace(microsecond=0)
+        expiry_time = datetime.fromisoformat(session.get('otp_expiry', '2000-01-01T00:00:00'))
+        
+        if current_time > expiry_time:
+            flash('OTP expired. Please try again.', 'error')
+            return redirect(url_for('register'))
+
+        user_otp = request.form['otp']
+        if 'otp' in session and int(user_otp) == session['otp']:
+            user = session.pop('temp_user')
+            users_collection.insert_one(user)
+            flash('Registration successful! Please login.', 'success')
+            return redirect(url_for('login'))
+        else:
+            flash('Invalid OTP', 'error')
+            
+    return render_template('verify_otp.html')
 
 # 16. Login Route to login the user
 @app.route('/login', methods=['GET', 'POST'])
@@ -483,288 +626,157 @@ def detect_category(description):
     except:
         return 'other'
 
-# 27. AI-Powered Financial Chat Assistant to get the AI chat of the user of the specified user_id
-# @app.route('/ai-chat', methods=['POST'])
-# @login_required
-# def ai_chat():
+
+
+@app.route('/generate_report', methods=['POST'])
+@login_required
+
+
+
+def generate_report():
     try:
         user_id = session['user_id']
-        user_message = request.json.get('message', '').strip()
+        report_type = request.form.get('report_type', 'monthly')
+        start_date = datetime.strptime(request.form.get('start_date'), '%Y-%m-%d')
+        end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d')
+        format_type = request.form.get('format', 'pdf')
         
-        # Get user's financial data
-        expenses = list(expenses_collection.find({'user_id': user_id}))
+        # Get expenses for the date range
+        expenses = list(expenses_collection.find({
+            'user_id': user_id,
+            'date': {
+                '$gte': start_date,
+                '$lte': end_date
+            }
+        }).sort('date', -1))
+
         if not expenses:
-            return jsonify({"response": "You haven't recorded any expenses yet. Start adding expenses to get insights!"})
-        
-        # Process financial data
-        daily_spending = {}
-        category_spending = {}
-        for e in expenses:
-            date_str = e['date'].strftime('%Y-%m-%d')
-            daily_spending[date_str] = daily_spending.get(date_str, 0) + e['amount']
-            category_spending[e['category']] = category_spending.get(e['category'], 0) + e['amount']
-        
-        # Structure data for AI
-        financial_context = f"""
-        User's Financial Data:
-        - Total expenses: {len(expenses)}
-        - Total amount spent: ₹{sum(e['amount'] for e in expenses):.2f}
-        - Daily spending peaks: {max(daily_spending.values(), default=0):.2f} on {max(daily_spending, key=daily_spending.get, default='N/A')}
-        - Top category: {max(category_spending, key=category_spending.get, default='N/A')} (₹{max(category_spending.values(), default=0):.2f})
-        Last 5 transactions:
-        {chr(10).join([f"₹{e['amount']:.2f} on {e['date'].strftime('%d %b')} - {e['description']}" for e in expenses[-5:]])}
-        """
-        
-        # Create instruction prompt
-        prompt = f"""You are a financial assistant analyzing this data:
-        {financial_context}
+            flash('No expenses found for the selected date range', 'error')
+            return redirect(url_for('dashboard'))
 
-        User Question: {user_message}
+        # Generate report based on format
+        if format_type == 'pdf':
+            return generate_pdf_report(expenses, report_type, start_date, end_date)
+        elif format_type == 'excel':
+            return generate_excel_report(expenses, report_type, start_date, end_date)
+        else:  # CSV
+            return generate_csv_report(expenses, report_type, start_date, end_date)
 
-        Response Guidelines:
-        1. Answer ONLY using the provided data
-        2. Be specific with dates/amounts
-        3. Mention exact numbers from data
-        4. If unsure, say "Not enough data"
-        5. Use ₹ symbol for amounts
-        6. Keep responses under 3 sentences
-
-        Examples:
-        Q: What day did I spend the most?
-        A: Your highest spending was ₹{max(daily_spending.values()):.2f} on {max(daily_spending, key=daily_spending.get)}.
-
-        Q: What's my most frequent category?
-        A: You spend most on {max(category_spending, key=category_spending.get)} (₹{max(category_spending.values()):.2f} total).
-        """
-        
-        # Get AI response
-        model = genai.GenerativeModel('gemini-1.5-pro')  # Updated model name
-        response = model.generate_content(prompt)
-        
-        return jsonify({"response": response.text})
-        
     except Exception as e:
-        print(f"Chat Error: {str(e)}")
-        return jsonify({"response": "Please try again in a moment. Our AI is currently busy."})
-# 28. Run the Flask application
+        flash(f'Error generating report: {str(e)}', 'error')
+        return redirect(url_for('dashboard'))
 
-# AI-Powered Financial Chat Assistant
-# @app.route('/ai-chat', methods=['POST'])
-# @login_required
-# def ai_chat():
-#     try:
-#         user_id = session['user_id']
-#         user_message = request.json.get('message', '').strip()
-        
-#         # Get user's financial data - extended period for better analysis
-#         expenses = list(expenses_collection.find({'user_id': user_id}))
-#         if not expenses:
-#             return jsonify({"response": "You haven't recorded any expenses yet. Start adding expenses to get insights on your financial patterns!"})
-        
-#         # Advanced financial data analysis
-#         total_spent = sum(e['amount'] for e in expenses)
-#         avg_transaction = total_spent / len(expenses) if expenses else 0
-        
-#         # Time-based analysis
-#         now = datetime.now()
-#         expenses_by_date = {}
-#         monthly_spending = {}
-#         weekly_spending = {}
-#         category_spending = {}
-#         recurring_expenses = {}
-        
-#         # Get current month start and end for monthly view
-#         current_month_start = datetime(now.year, now.month, 1)
-#         current_month_end = datetime(now.year, now.month, calendar.monthrange(now.year, now.month)[1])
-        
-#         # Previous month for comparison
-#         if now.month == 1:  # January
-#             prev_month = 12
-#             prev_year = now.year - 1
-#         else:
-#             prev_month = now.month - 1
-#             prev_year = now.year
-            
-#         prev_month_start = datetime(prev_year, prev_month, 1)
-#         prev_month_end = datetime(prev_year, prev_month, calendar.monthrange(prev_year, prev_month)[1])
-        
-#         # Analyze each expense
-#         for e in expenses:
-#             # Daily analysis
-#             date_str = e['date'].strftime('%Y-%m-%d')
-#             expenses_by_date[date_str] = expenses_by_date.get(date_str, 0) + e['amount']
-            
-#             # Monthly analysis
-#             month_str = e['date'].strftime('%Y-%m')
-#             monthly_spending[month_str] = monthly_spending.get(month_str, 0) + e['amount']
-            
-#             # Weekly analysis (Monday as start of week)
-#             week_start = e['date'] - timedelta(days=e['date'].weekday())
-#             week_str = week_start.strftime('%Y-%m-%d')
-#             weekly_spending[week_str] = weekly_spending.get(week_str, 0) + e['amount']
-            
-#             # Category analysis
-#             category_spending[e['category']] = category_spending.get(e['category'], 0) + e['amount']
-            
-#             # Track potential recurring expenses by description
-#             desc_key = e['description'].lower().strip()
-#             if desc_key not in recurring_expenses:
-#                 recurring_expenses[desc_key] = []
-#             recurring_expenses[desc_key].append(e['date'])
-        
-#         # Calculate current month spending
-#         current_month_expenses = [e for e in expenses if current_month_start <= e['date'] <= current_month_end]
-#         current_month_total = sum(e['amount'] for e in current_month_expenses)
-        
-#         # Calculate previous month spending
-#         prev_month_expenses = [e for e in expenses if prev_month_start <= e['date'] <= prev_month_end]
-#         prev_month_total = sum(e['amount'] for e in prev_month_expenses)
-        
-#         # Monthly spending trend (increase/decrease)
-#         monthly_change = 0
-#         if prev_month_total > 0:
-#             monthly_change = ((current_month_total - prev_month_total) / prev_month_total) * 100
-        
-#         # Identify potential recurring expenses (appearing at least twice with similar dates)
-#         potential_subscriptions = []
-#         for desc, dates in recurring_expenses.items():
-#             if len(dates) >= 2:
-#                 # Find expenses that occur on similar days of month
-#                 day_counts = {}
-#                 for date in dates:
-#                     day = date.day
-#                     day_counts[day] = day_counts.get(day, 0) + 1
-                
-#                 # If an expense occurs on similar days of month multiple times
-#                 if any(count >= 2 for count in day_counts.values()):
-#                     matching_expenses = [e for e in expenses if e['description'].lower().strip() == desc]
-#                     amount = matching_expenses[0]['amount'] if matching_expenses else 0
-#                     potential_subscriptions.append({
-#                         'description': desc,
-#                         'amount': amount,
-#                         'occurrences': len(dates)
-#                     })
-        
-#         # Find unusual spending (more than 50% above the average for that category)
-#         unusual_spending = []
-#         for cat, total in category_spending.items():
-#             cat_expenses = [e for e in expenses if e['category'] == cat]
-#             cat_avg = total / len(cat_expenses)
-            
-#             for e in cat_expenses:
-#                 if e['amount'] > (cat_avg * 1.5) and e['amount'] > 500:  # Significant amount over average
-#                     unusual_spending.append({
-#                         'date': e['date'].strftime('%Y-%m-%d'),
-#                         'amount': e['amount'],
-#                         'description': e['description'],
-#                         'category': cat
-#                     })
-        
-#         # Sort unusual spending by amount (highest first)
-#         unusual_spending.sort(key=lambda x: x['amount'], reverse=True)
-        
-#         # Calculate spending frequency
-#         days_with_expenses = len(expenses_by_date)
-#         date_range = (max([e['date'] for e in expenses]) - min([e['date'] for e in expenses])).days + 1
-#         spending_frequency = days_with_expenses / date_range if date_range > 0 else 0
-#         spending_frequency_pct = spending_frequency * 100
-        
-#         # Structure advanced financial insights
-#         financial_context = f"""
-#         USER FINANCIAL PROFILE:
-#         - Total recorded expenses: {len(expenses)}
-#         - Total amount spent: ₹{total_spent:.2f}
-#         - Average transaction: ₹{avg_transaction:.2f}
-#         - Spending frequency: {spending_frequency_pct:.1f}% of days have expenses
-        
-#         MONTHLY INSIGHTS:
-#         - Current month spending: ₹{current_month_total:.2f}
-#         - Previous month spending: ₹{prev_month_total:.2f}
-#         - Month-over-month change: {monthly_change:+.1f}%
-        
-#         SPENDING PATTERNS:
-#         - Highest daily spending: ₹{max(expenses_by_date.values(), default=0):.2f} on {max(expenses_by_date, key=expenses_by_date.get, default='N/A')}
-#         - Top spending category: {max(category_spending, key=category_spending.get, default='N/A')} (₹{max(category_spending.values(), default=0):.2f})
-#         - Category breakdown: {', '.join([f"{k}: ₹{v:.2f}" for k, v in sorted(category_spending.items(), key=lambda item: item[1], reverse=True)[:3]])}
-        
-#         POTENTIAL RECURRING EXPENSES:
-#         {chr(10).join([f"- {sub['description'].title()}: ₹{sub['amount']:.2f} (detected {sub['occurrences']} times)" for sub in potential_subscriptions[:3]])}
-        
-#         UNUSUAL TRANSACTIONS:
-#         {chr(10).join([f"- ₹{unu['amount']:.2f} on {unu['date']} - {unu['description']}" for unu in unusual_spending[:3]])}
-        
-#         RECENT TRANSACTIONS:
-#         {chr(10).join([f"- ₹{e['amount']:.2f} on {e['date'].strftime('%d %b')} - {e['description']}" for e in sorted(expenses, key=lambda x: x['date'], reverse=True)[:5]])}
-#         """
-        
-#         # Create finance-specific prompt with expert knowledge
-#         prompt = f"""You are an expert financial advisor analyzing personal financial data with 15+ years of experience in personal finance and wealth management user can ask anything spedific to finance please answer it wisely and perfectly.
 
-#         USER DATA:
-#         {financial_context}
 
-#         User Question: {user_message}
 
-#         INSTRUCTIONS:
-#         1. Provide professional financial insights strictly based on the user's data
-#         2. Use precise financial terminology while keeping explanations accessible
-#         3. Include specific amounts, dates, and percentages when relevant
-#         4. For spending patterns, highlight areas of concern or optimization
-#         5. For personal finance questions, provide actionable advice based on the data
-#         6. Focus on both short-term patterns and long-term implications
-#         7. Be compassionate about financial situations but factual about the data 
-#         8. If data is insufficient for a complete answer, be transparent about limitations
-#         9. Use ₹ symbol for all monetary values
-#         10. Keep responses concise and focused - typically 2-4 sentences
-        
-#         RESPONSE FORMAT:
-#         - Start with a direct answer to the question
-#         - Follow with 1-2 insights from the data
-#         - End with a brief, actionable recommendation if appropriate
-#         """
-        
-#         # Get AI response
-#         model = genai.GenerativeModel('gemini-1.5-pro')
-#         generation_config = {
-#             "temperature": 0.2,  # Lower temperature for more focused, professional responses
-#             "top_p": 0.95,
-#             "top_k": 40,
-#             "max_output_tokens": 200,  # Keep responses concise
-#         }
-        
-#         response = model.generate_content(
-#             prompt,
-#             generation_config=generation_config
-#         )
-        
-#         return jsonify({"response": response.text})
-        
-#     except Exception as e:
-#         print(f"Chat Error: {str(e)}")
-        
-#         # Provide intelligent fallback responses based on the question
-#         try:
-#             if "what is finance" in user_message.lower():
-#                 return jsonify({"response": "Finance is the management of money, investments, and other assets. Looking at your data, you have expenses across various categories, with your highest spending in " + max(category_spending, key=category_spending.get, default='N/A') + "."})
-            
-#             elif any(word in user_message.lower() for word in ["budget", "spending", "spend", "spent"]):
-#                 return jsonify({"response": f"Your total spending is ₹{total_spent:.2f} across {len(expenses)} transactions. Your highest spending category is {max(category_spending, key=category_spending.get, default='N/A')} at ₹{max(category_spending.values(), default=0):.2f}."})
-            
-#             elif any(word in user_message.lower() for word in ["category", "expense", "expenses"]):
-#                 categories = sorted(category_spending.items(), key=lambda x: x[1], reverse=True)
-#                 return jsonify({"response": f"Your top 3 spending categories are: {categories[0][0]} (₹{categories[0][1]:.2f}), {categories[1][0]} (₹{categories[1][1]:.2f}), and {categories[2][0]} (₹{categories[2][1]:.2f})."})
-            
-#             elif any(word in user_message.lower() for word in ["trend", "pattern", "increase", "decrease"]):
-#                 trend_msg = f"Your spending has {'increased' if monthly_change > 0 else 'decreased'} by {abs(monthly_change):.1f}% compared to last month."
-#                 return jsonify({"response": trend_msg})
-            
-#             else:
-#                 return jsonify({"response": f"Based on your {len(expenses)} recorded expenses totaling ₹{total_spent:.2f}, you spend most frequently on {max(category_spending, key=category_spending.get, default='N/A')}. I can analyze trends, categories, and specific expense patterns if you'd like more detailed insights."})
-                
-#         except Exception:
-#             # Ultimate fallback if even the fallbacks fail
-#             return jsonify({"response": "I'm analyzing your financial data. Could you please try a more specific question about your spending, categories, or financial trends?"})
+def generate_pdf_report(expenses, report_type, start_date, end_date):
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
+    styles = getSampleStyleSheet()
 
+    # Add title
+    title = f"Financial Report ({start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')})"
+    elements.append(Paragraph(title, styles['Title']))
+    elements.append(Spacer(1, 20))
+
+    # Summary section
+    total_spent = sum(expense['amount'] for expense in expenses)
+    summary_data = [
+        ['Total Expenses', f'₹{total_spent:.2f}'],
+        ['Number of Transactions', str(len(expenses))],
+    ]
+    
+    summary_table = Table(summary_data)
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    elements.append(summary_table)
+    elements.append(Spacer(1, 20))
+
+    # Expense details
+    expense_data = [[
+        'Date', 'Description', 'Category', 'Amount'
+    ]]
+    for expense in expenses:
+        expense_data.append([
+            expense['date'].strftime('%Y-%m-%d'),
+            expense['description'],
+            expense['category'],
+            f'₹{expense["amount"]:.2f}'
+        ])
+
+    expense_table = Table(expense_data)
+    expense_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    elements.append(expense_table)
+
+    # Generate PDF
+    doc.build(elements)
+    buffer.seek(0)
+    
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f'financial_report_{datetime.now().strftime("%Y%m%d")}.pdf',
+        mimetype='application/pdf'
+    )
+
+def generate_excel_report(expenses, report_type, start_date, end_date):
+    df = pd.DataFrame(expenses)
+    df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
+    df = df[['date', 'description', 'category', 'amount']]
+    
+    buffer = BytesIO()
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name='Expenses', index=False)
+    
+    buffer.seek(0)
+    
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f'financial_report_{datetime.now().strftime("%Y%m%d")}.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+def generate_csv_report(expenses, report_type, start_date, end_date):
+    df = pd.DataFrame(expenses)
+    df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%%d')
+    df = df[['date', 'description', 'category', 'amount']]
+    
+    buffer = BytesIO()
+    df.to_csv(buffer, index=False)
+    buffer.seek(0)
+    
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f'financial_report_{datetime.now().strftime("%Y%m%d")}.csv',
+        mimetype='text/csv'
+    )
+# 27. AI-Powered Financial Chat Assistant to get the AI chat of the user of the specified user_id
 
 @app.route('/ai-chat', methods=['POST'])
 @login_required
@@ -836,6 +848,9 @@ def ai_chat():
         return jsonify({
             "response": "I'm having trouble processing your request. Could you please try again?"
         })
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

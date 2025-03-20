@@ -3,7 +3,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 import google.generativeai as genai
 
-API_KEY = "AIzaSyBimFWYTtL4trfzyqWLyqiHaeP-zrTx8DU"
+API_KEY = ""
 genai.configure(api_key=API_KEY)
 
 model = genai.GenerativeModel('gemini-1.5-pro')

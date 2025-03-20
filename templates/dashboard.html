@@ -56,6 +56,115 @@ content %}
       </div>
     </div>
   </div>
+<!-- Add this after the Stats Overview section and before the Charts section -->
+<div class="flex justify-end gap-4 mb-8">
+  <!-- Generate Report Button -->
+  <button 
+      onclick="toggleReportModal()"
+      class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200">
+      <i class="fas fa-file-alt mr-2"></i>
+      Generate Report
+  </button>
+  
+  <!-- Submit Activity Button -->
+  <button 
+      onclick="toggleActivityModal()"
+      class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200">
+      <i class="fas fa-plus mr-2"></i>
+      Add Expenses
+  </button>
+</div>
+
+<!-- Report Generation Modal -->
+<div id="reportModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center">
+  <div class="bg-white rounded-lg shadow-xl p-6 m-4 max-w-xl w-full">
+      <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold text-gray-900">Generate Financial Report</h3>
+          <button onclick="toggleReportModal()" class="text-gray-400 hover:text-gray-600">
+              <i class="fas fa-times"></i>
+          </button>
+      </div>
+      
+      <form id="reportForm" class="space-y-4">
+          <!-- Report Type -->
+          <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
+              <select name="report_type" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="monthly">Monthly Summary</option>
+                  <option value="category">Category Analysis</option>
+                  <option value="trends">Spending Trends</option>
+                  <option value="complete">Complete Report</option>
+              </select>
+          </div>
+
+          <!-- Date Range -->
+          <div class="grid grid-cols-2 gap-4">
+              <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                  <input name="start_date" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                  <input name="end_date" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+          </div>
+
+          <!-- Format Options -->
+          <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Format</label>
+              <div class="flex gap-4">
+                  <label class="inline-flex items-center">
+                      <input type="radio" name="format" value="pdf" class="form-radio text-blue-600" checked>
+                      <span class="ml-2">PDF</span>
+                  </label>
+                  <label class="inline-flex items-center">
+                      <input type="radio" name="format" value="excel" class="form-radio text-blue-600">
+                      <span class="ml-2">Excel</span>
+                  </label>
+                  <label class="inline-flex items-center">
+                      <input type="radio" name="format" value="csv" class="form-radio text-blue-600">
+                      <span class="ml-2">CSV</span>
+                  </label>
+              </div>
+          </div>
+
+          <!-- Include Options -->
+          <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Include in Report</label>
+              <div class="space-y-2">
+                  <label class="inline-flex items-center">
+                      <input type="checkbox" class="form-checkbox text-blue-600" checked>
+                      <span class="ml-2">Charts and Graphs</span>
+                  </label>
+                  <label class="inline-flex items-center">
+                      <input type="checkbox" class="form-checkbox text-blue-600" checked>
+                      <span class="ml-2">Transaction Details</span>
+                  </label>
+                  <label class="inline-flex items-center">
+                      <input type="checkbox" class="form-checkbox text-blue-600" checked>
+                      <span class="ml-2">Category Summary</span>
+                  </label>
+              </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex justify-end gap-4 mt-6">
+              <button 
+                  type="button"
+                  onclick="toggleReportModal()"
+                  class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">
+                  Cancel
+              </button>
+              <button 
+                  type="submit"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200">
+                  Generate Report
+              </button>
+          </div>
+      </form>
+  </div>
+</div>
+
 
   <!-- Charts -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -321,4 +430,129 @@ content %}
   // Initial load
   loadAIInsights();
   </script>
+  <script>
+    // Single function to handle modal toggle
+    function toggleReportModal() {
+        const modal = document.getElementById('reportModal');
+        if (!modal) return;
+        modal.classList.toggle('hidden');
+        modal.classList.toggle('flex');
+    }
+    
+    // Initialize form and handle all report-related functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const reportForm = document.getElementById('reportForm');
+        if (!reportForm) return;
+    
+        // Initialize date inputs with default values
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        
+        // Get and configure form elements
+        const reportTypeSelect = reportForm.querySelector('select');
+        const startDateInput = reportForm.querySelector('input[type="date"]:first-of-type');
+        const endDateInput = reportForm.querySelector('input[type="date"]:last-of-type');
+        const checkboxes = reportForm.querySelectorAll('input[type="checkbox"]');
+        const formatRadios = reportForm.querySelectorAll('input[name="format"]');
+        const includeCharts = reportForm.querySelector('input[name="include_charts"]');
+    
+        // Set names and default values
+        if (reportTypeSelect) reportTypeSelect.name = 'report_type';
+        if (startDateInput) {
+            startDateInput.name = 'start_date';
+            startDateInput.value = firstDay.toISOString().split('T')[0];
+        }
+        if (endDateInput) {
+            endDateInput.name = 'end_date';
+            endDateInput.value = today.toISOString().split('T')[0];
+        }
+    
+        // Set checkbox names
+        if (checkboxes.length >= 3) {
+            checkboxes[0].name = 'include_charts';
+            checkboxes[1].name = 'include_transactions';
+            checkboxes[2].name = 'include_categories';
+        }
+    
+        // Handle format radio changes
+        formatRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (!includeCharts) return;
+                includeCharts.disabled = this.value !== 'pdf';
+                if (this.value !== 'pdf') {
+                    includeCharts.checked = false;
+                }
+            });
+        });
+    
+        // Handle date validation
+        function validateDates() {
+            if (!startDateInput || !endDateInput) return;
+            const start = new Date(startDateInput.value);
+            const end = new Date(endDateInput.value);
+            if (start > end) {
+                alert('Start date cannot be after end date');
+                return false;
+            }
+            return true;
+        }
+    
+        // Add date change listeners
+        [startDateInput, endDateInput].forEach(input => {
+            input.addEventListener('change', validateDates);
+        });
+    
+        // Handle form submission
+        reportForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!validateDates()) return;
+            
+            const submitButton = this.querySelector('button[type="submit"]');
+            if (!submitButton) return;
+            
+            // Show loading state
+            const originalText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+    
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('/generate_report', {
+                    method: 'POST',
+                    body: formData
+                });
+    
+                if (!response.ok) throw new Error('Network response was not ok');
+    
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const format = formData.get('format') || 'pdf';
+                
+                a.href = url;
+                a.download = `financial_report_${new Date().toISOString().slice(0,10)}.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                toggleReportModal();
+                
+                alert('Report generated successfully!');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error generating report. Please try again.');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            }
+        });
+    });
+    
+    // Activity modal redirect
+    function toggleActivityModal() {
+        window.location.href = "{{ url_for('add_expense') }}";
+    }
+    </script>
 {% endblock %}

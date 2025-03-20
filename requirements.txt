@@ -8,3 +8,6 @@ gunicorn
 pymongo
 pymongo[srv]
 flask-limiter
+reportlab 
+pandas 
+openpyxl
