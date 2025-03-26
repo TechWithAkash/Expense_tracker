@@ -14,8 +14,8 @@ from bson import ObjectId
 from dotenv import load_dotenv
 import sys
 import os
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+# from flask_limiter import Limiter
+# from flask_limiter.util import get_remote_address
 import google.generativeai as genai
 from dotenv import load_dotenv
 import logging
@@ -55,12 +55,12 @@ app.secret_key = os.urandom(24)
 
 # 6. Configure Flask-Limiter
 # Replace the existing Limiter configuration with this:
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["5 per minute", "100 per hour"],
-    storage_uri="memory://"
-)
+# limiter = Limiter(
+#     get_remote_address,
+#     app=app,
+#     default_limits=["5 per minute", "100 per hour"],
+#     storage_uri="memory://"
+# )
 
 # 6. Add these configurations after app creation
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -340,7 +340,7 @@ def send_otp(email, otp):
 
 # Modify the verify_otp route
 @app.route('/verify_otp', methods=['GET', 'POST'])
-@limiter.limit("10 per minute")
+# @limiter.limit("10 per minute")
 def verify_otp():
     session["otp_attempts"] = session.get('otp_attempts', 0) + 1
     if session["otp_attempts"] > 10:
