@@ -8,9 +8,8 @@
 ## Overview 🚀
 FinTrack is an advanced personal finance management application designed to help users track their expenses, analyze spending habits, and receive AI-powered financial insights. Built with Flask and MongoDB, FinTrack provides an intuitive and seamless experience for managing personal finances efficiently.
 
-### Live Demo & Video Demo
-- **Live Demo:** [Click Here](#) *(Update with actual link)*
-- **Video Demo:** [Watch Here](#) *(Update with actual link)*
+## Live Demo 
+- **Live Demo:** [Click Here](https://fintrack-aj5l.onrender.com)
 
 ## Features ✨
 
