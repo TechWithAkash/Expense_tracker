@@ -1,73 +1,217 @@
 
-<!-- templates/edit_expense.html -->
+
 {% extends "base.html" %}
 {% block title %}Edit Expense{% endblock %}
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <div class="bg-white rounded-lg shadow-lg p-8">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Edit Expense</h2>
-            <a href="{{ url_for('dashboard') }}" class="text-blue-500 hover:text-blue-600">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
-            </a>
-        </div>
-        
-        <form method="POST" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                        Description *
-                    </label>
-                    <input type="text" name="description" id="description" required
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        value="{{ expense.description }}">
+<div class="max-w-4xl mx-auto pt-8 px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100">
+        <!-- Header Section with Gradient -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-2xl px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="p-2 bg-white/10 rounded-lg">
+                        <i class="fas fa-edit text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Edit Expense</h2>
                 </div>
-                
-                <div>
-                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
-                        Amount (₹) *
-                    </label>
-                    <input type="number" name="amount" id="amount" step="0.01" required
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        value="{{ expense.amount }}">
-                </div>
-
-                <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
-                        Category *
-                    </label>
-                    <select name="category" id="category" required
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="food" {% if expense.category == 'food' %}selected{% endif %}>Food</option>
-                        <option value="transport" {% if expense.category == 'transport' %}selected{% endif %}>Transport</option>
-                        <option value="entertainment" {% if expense.category == 'entertainment' %}selected{% endif %}>Entertainment</option>
-                        <option value="utilities" {% if expense.category == 'utilities' %}selected{% endif %}>Utilities</option>
-                        <option value="shopping" {% if expense.category == 'shopping' %}selected{% endif %}>Shopping</option>
-                        <option value="other" {% if expense.category == 'other' %}selected{% endif %}>Other</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="date" class="block text-sm font-medium text-gray-700 mb-2">
-                        Date *
-                    </label>
-                    <input type="date" name="date" id="date" required
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        value="{{ expense.date|format_date }}">
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end space-x-4 mt-6">
-                <a href="{{ url_for('dashboard') }}"
-                    class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
-                    Cancel
+                <a href="{{ url_for('dashboard') }}" 
+                   class="flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 text-white font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
                 </a>
-                <button type="submit"
-                    class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-                    <i class="fas fa-save mr-2"></i> Save Changes
-                </button>
             </div>
-        </form>
+        </div>
+
+        <!-- Form Section -->
+        <div class="p-8">
+            <form method="POST" class="space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Description Field -->
+                    <div class="space-y-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700">
+                            Description <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fas fa-pencil-alt absolute left-3 top-3.5 text-gray-400"></i>
+                            <input type="text" name="description" id="description" required
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
+                                value="{{ expense.description }}">
+                        </div>
+                    </div>
+
+                    <!-- Amount Field -->
+                    <div class="space-y-2">
+                        <label for="amount" class="block text-sm font-medium text-gray-700">
+                            Amount <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-500">₹</span>
+                            <input type="number" name="amount" id="amount" step="0.01" required
+                                class="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
+                                value="{{ expense.amount }}">
+                        </div>
+                    </div>
+
+                    <!-- Category Field -->
+                    <div class="space-y-2">
+                        <label for="category" class="block text-sm font-medium text-gray-700">
+                            Category <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fas fa-tag absolute left-3 top-3.5 text-gray-400"></i>
+                            <select name="category" id="category" required
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 appearance-none">
+                                <option value="food" {% if expense.category == 'food' %}selected{% endif %}>🍕 Food</option>
+                                <option value="transport" {% if expense.category == 'transport' %}selected{% endif %}>🚗 Transport</option>
+                                <option value="entertainment" {% if expense.category == 'entertainment' %}selected{% endif %}>🎮 Entertainment</option>
+                                <option value="utilities" {% if expense.category == 'utilities' %}selected{% endif %}>💡 Utilities</option>
+                                <option value="shopping" {% if expense.category == 'shopping' %}selected{% endif %}>🛍️ Shopping</option>
+                                <option value="healthcare" {% if expense.category == 'healthcare' %}selected{% endif %}>⚕️ Healthcare</option>
+                                <option value="education" {% if expense.category == 'education' %}selected{% endif %}>📚 Education</option>
+                                <option value="other" {% if expense.category == 'other' %}selected{% endif %}>📌 Other</option>
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-3 top-3.5 text-gray-400 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Date Field -->
+                    <div class="space-y-2">
+                        <label for="date" class="block text-sm font-medium text-gray-700">
+                            Date <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fas fa-calendar absolute left-3 top-3.5 text-gray-400"></i>
+                            <input type="date" name="date" id="date" required
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
+                                value="{{ expense.date|format_date }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex items-center justify-end space-x-4 pt-6">
+                    <a href="{{ url_for('dashboard') }}"
+                        class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 
+                               focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 
+                               transition-all duration-300 flex items-center">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </a>
+                    <button type="submit"
+                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl 
+                               hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 
+                               focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 
+                               transform hover:-translate-y-0.5 flex items-center">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+<!-- Footer Section -->
+<footer class="mt-16 bg-white border-t border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- Brand Section -->
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg">
+                        <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        FinTrack
+                    </span>
+                </div>
+                <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                    Track your expenses smartly with AI-powered insights and comprehensive financial management tools.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="https://github.com/TechWithAkash/Expense_tracker" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Quick Links</h3>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="{{ url_for('dashboard') }}" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Reports
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Support -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Support</h3>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Help Center
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Privacy Policy
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Terms of Service
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Copyright -->
+        <div class="mt-8 pt-8 border-t border-gray-100">
+            <p class="text-center text-gray-400 text-sm">
+                &copy; {{ now.year }} FinTrack. All rights reserved. Made with <i class="fas fa-heart text-red-500"></i> by 
+                <a href="https://github.com/TechWithAkash" class="text-blue-600 hover:text-blue-700">Akash</a>
+            </p>
+        </div>
+    </div>
+</footer>
+
+<!-- Add this script at the end of the file -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add animation to form fields
+    const formFields = document.querySelectorAll('input, select');
+    formFields.forEach(field => {
+        field.addEventListener('focus', function() {
+            this.closest('div').classList.add('scale-105');
+        });
+        field.addEventListener('blur', function() {
+            this.closest('div').classList.remove('scale-105');
+        });
+    });
+});
+</script>
 {% endblock %}

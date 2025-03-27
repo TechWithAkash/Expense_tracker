@@ -141,41 +141,89 @@
 </div>
 
 <!-- Footer -->
-<footer class="bg-gray-50">
-    <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+<!-- Footer Section -->
+<footer class="mt-16 bg-white border-t border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- Brand Section -->
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg">
+                        <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        FinTrack
+                    </span>
+                </div>
+                <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                    Track your expenses smartly with AI-powered insights and comprehensive financial management tools.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="https://github.com/TechWithAkash/Expense_tracker" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
             <div>
-                <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Product</h3>
-                <ul class="mt-4 space-y-4">
-                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Features</a></li>
-                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Pricing</a></li>
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Quick Links</h3>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="{{ url_for('dashboard') }}" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Reports
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Settings
+                        </a>
+                    </li>
                 </ul>
             </div>
+
+            <!-- Support -->
             <div>
-                <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Support</h3>
-                <ul class="mt-4 space-y-4">
-                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Documentation</a></li>
-                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Contact</a></li>
-                </ul>
-            </div>
-            <div>
-                <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Company</h3>
-                <ul class="mt-4 space-y-4">
-                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">About</a></li>
-                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Blog</a></li>
-                </ul>
-            </div>
-            <div>
-                <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Legal</h3>
-                <ul class="mt-4 space-y-4">
-                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Privacy</a></li>
-                    <li><a href="#" class="text-base text-gray-500 hover:text-gray-900">Terms</a></li>
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Support</h3>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Help Center
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Privacy Policy
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors text-sm">
+                            Terms of Service
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
-        <div class="mt-8 border-t border-gray-200 pt-8">
-            <p class="text-base text-gray-400 text-center">
-                &copy; 2024 FinTrack. All rights reserved.
+
+        <!-- Copyright -->
+        <div class="mt-8 pt-8 border-t border-gray-100">
+            <p class="text-center text-gray-400 text-sm">
+                &copy; {{ now.year }} FinTrack. All rights reserved. Made with <i class="fas fa-heart text-red-500"></i> by 
+                <a href="https://github.com/TechWithAkash" class="text-blue-600 hover:text-blue-700">Akash</a>
             </p>
         </div>
     </div>
