@@ -132,14 +132,17 @@ SENDER_APP_PASSWORD=your_app_password
 
 ## Screenshots 📸
 
-### Login Page
-![Login Page](#) *(Update with actual image link)*
+## Login Page  
+![Image](https://github.com/user-attachments/assets/47ab1e4c-32ac-4e03-807f-05934f56933d)
 
-### Dashboard
-![Dashboard](#) *(Update with actual image link)*
+## Home Page  
+![Image](https://github.com/user-attachments/assets/ef4d331f-6062-4dbe-9fdd-a16686dbff2d)
 
-### Reports
-![Reports](#) *(Update with actual image link)*
+## Add Expense  
+![Image](https://github.com/user-attachments/assets/c2c30998-f91d-44d2-8116-3feea1246875)
+
+## Dashboard   
+![Image](https://github.com/user-attachments/assets/2bd0f169-66ec-43c7-b655-5bb0482c9d8c)
 
 ## Contributing 🤝
 Contributions are always welcome! If you want to contribute, please check out the [contributing guidelines](CONTRIBUTING.md).
