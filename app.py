@@ -272,6 +272,7 @@ def register():
             'name': name,
             'created_at': datetime.now()
         }
+        flash('OTP sent to your email. Please verify.', 'info') 
         return redirect(url_for('verify_otp'))
     return render_template('register.html')
 

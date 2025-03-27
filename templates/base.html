@@ -1,4 +1,4 @@
-    <!-- templates/base.html -->
+<!-- templates/base.html -->
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -20,175 +20,128 @@
     <body class="bg-gray-50 min-h-screen flex flex-col">
         {% if request.endpoint not in ['login', 'register'] %}
         <!-- Navbar -->
-        <nav class="bg-white shadow-lg">
+        <nav class="bg-white shadow-lg border-b border-gray-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-16">
+                <div class="flex justify-between items-center h-20">
                     <!-- Logo with Icon -->
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="{{ url_for('index') }}" class="flex items-center space-x-2 group">
-                            <svg class="w-8 h-8 text-blue-600 group-hover:text-blue-700 transition duration-300" 
-                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                                 stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                            </svg>
-                            <span class="text-2xl font-bold text-blue-600 group-hover:text-blue-700 transition duration-300">
+                        <a href="{{ url_for('index') }}" class="flex items-center space-x-3 group">
+                            <div class="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg transform group-hover:scale-105 transition-all duration-300">
+                                <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                </svg>
+                            </div>
+                            <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                                 FinTrack
                             </span>
                         </a>
                     </div>
-    
+        
                     <!-- Desktop Navigation -->
                     <div class="hidden md:flex items-center space-x-8">
                         {% if user_stats %}
-                        <!-- Stats -->
-                        <div class="flex space-x-6">
-                            <div class="flex items-center bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-2 rounded-lg 
-                                        border border-blue-100">
-                                <i class="fas fa-wallet text-blue-500 mr-2"></i>
-                                <span class="text-gray-900 font-medium">₹{{ "%.2f"|format(user_stats.total_spent) }}</span>
-                            </div>
-                            <div class="flex items-center bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-2 rounded-lg 
-                                        border border-blue-100">
-                                <i class="fas fa-receipt text-blue-500 mr-2"></i>
-                                <span class="text-gray-900 font-medium">{{ user_stats.total_expenses }} expenses</span>
-                            </div>
-                        </div>
-    
-                        <!-- User Menu -->
-                        <div class="flex items-center space-x-4">
-                            <a href="{{ url_for('add_expense') }}" 
-                               class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all 
-                                      duration-300 flex items-center shadow-sm hover:shadow-md">
-                                <i class="fas fa-plus mr-2"></i>
-                                <span>Add Expense</span>
-                            </a>
-                            
-                            <!-- Enhanced User Dropdown -->
-                            <div class="relative" x-data="{ open: false }" @click.away="open = false">
-                                <button @click="open = !open" 
-                                        class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 
-                                               transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <i class="fas fa-user-circle text-2xl text-blue-500"></i>
-                                    <span class="hidden lg:inline font-medium text-gray-700">{{ user_stats.name }}</span>
-                                    <i class="fas fa-chevron-down text-sm mt-1 text-gray-500"></i>
-                                </button>
-                                
-                                <!-- Dropdown Content with Animation -->
-                                <div x-show="open" x-transition:enter="transition ease-out duration-200"
-                                     x-transition:enter-start="opacity-0 translate-y-1" 
-                                     x-transition:enter-end="opacity-100 translate-y-0"
-                                     x-transition:leave="transition ease-in duration-150"
-                                     x-transition:leave-start="opacity-100 translate-y-0"
-                                     x-transition:leave-end="opacity-0 translate-y-1"
-                                     class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 border 
-                                            border-gray-100 z-50"
-                                     style="display: none;">
-                                    <a href="{{ url_for('profile') }}"
-                                       class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 
-                                              transition duration-200">
-                                              <i class="fas fa-user-circle text-2xl mr-2 text-blue-500"></i>
-                                              <span class="">Profile</span>
-                                    </a>
-                                    <a href="{{ url_for('logout') }}" 
-                                       class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 
-                                              transition duration-200">
-                                        <i class="fas text-red-600 fa-sign-out-alt mr-3 text-gray-500"></i>
-                                        <span class="text-red-600">Logout</span>
-                                    </a>
+                            <!-- Stats -->
+                            <div class="flex space-x-6">
+                                <div class="flex items-center bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-2.5 rounded-xl 
+                                            border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                    <i class="fas fa-wallet text-blue-600 mr-3 text-lg"></i>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs text-gray-500 font-medium">Total Spent</span>
+                                        <span class="text-gray-900 font-semibold">₹{{ "%.2f"|format(user_stats.total_spent) }}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-2.5 rounded-xl 
+                                            border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                    <i class="fas fa-receipt text-indigo-600 mr-3 text-lg"></i>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs text-gray-500 font-medium">Total Expenses</span>
+                                        <span class="text-gray-900 font-semibold">{{ user_stats.total_expenses }}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+        
+                            <!-- User Menu -->
+                            <div class="flex items-center space-x-6">
+                                <a href="{{ url_for('add_expense') }}" 
+                                   class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 
+                                          text-white px-6 py-2.5 rounded-xl transition-all duration-300 flex items-center 
+                                          shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    <span>Add Expense</span>
+                                </a>
+                                
+                                <!-- User Dropdown -->
+                                <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                                    <button @click="open = !open" 
+                                            class="flex items-center space-x-3 px-4 py-2 rounded-xl hover:bg-gray-50 
+                                                   transition duration-300 focus:outline-none group">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 
+                                                  flex items-center justify-center text-white shadow-md">
+                                            <i class="fas fa-user-circle text-xl"></i>
+                                        </div>
+                                        <div class="flex flex-col items-start">
+                                            <span class="text-sm font-semibold text-gray-700">{{ user_stats.name }}</span>
+                                            <span class="text-xs text-gray-500">View Profile</span>
+                                        </div>
+                                        <i class="fas fa-chevron-down text-sm text-gray-400 group-hover:text-gray-600"></i>
+                                    </button>
+                                    
+                                    <!-- Dropdown Menu -->
+                                    <div x-show="open" 
+                                         x-transition:enter="transition ease-out duration-200"
+                                         x-transition:enter-start="opacity-0 translate-y-1" 
+                                         x-transition:enter-end="opacity-100 translate-y-0"
+                                         x-transition:leave="transition ease-in duration-150"
+                                         x-transition:leave-start="opacity-100 translate-y-0"
+                                         x-transition:leave-end="opacity-0 translate-y-1"
+                                         class="absolute right-0 mt-3 w-60 bg-white rounded-xl shadow-xl py-2 border border-gray-100 z-50"
+                                         style="display: none;">
+                                        <a href="{{ url_for('profile') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition duration-200 group">
+                                            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
+                                                <i class="fas fa-user-circle text-blue-600"></i>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="font-medium">Profile</span>
+                                                <span class="text-xs text-gray-500">View and edit your profile</span>
+                                            </div>
+                                        </a>
+                                        <div class="border-t my-2"></div>
+                                        <a href="{{ url_for('logout') }}" class="flex items-center px-4 py-3 text-red-600 hover:bg-red-50 transition duration-200 group">
+                                            <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center mr-3 group-hover:bg-red-200 transition-colors">
+                                                <i class="fas fa-sign-out-alt text-red-600"></i>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="font-medium">Logout</span>
+                                                <span class="text-xs text-red-500">Sign out of your account</span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         {% else %}
-                        <!-- Guest Menu -->
-                        <div class="flex items-center space-x-4">
-                            <a href="{{ url_for('login') }}" 
-                               class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition duration-300 
-                                     font-medium">
-                                Login
-                            </a>
-                            <a href="{{ url_for('register') }}" 
-                               class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300 
-                                      shadow-sm hover:shadow-md">
-                                Register
-                            </a>
-                        </div>
-                        {% endif %}
-                    </div>
-    
-                    <!-- Mobile Menu Button -->
-                    <div class="md:hidden">
-                        <button id="mobile-menu-button" 
-                                class="p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none 
-                                       focus:ring-2 focus:ring-blue-500">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                      d="M4 6h16M4 12h16m-16 6h16"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-    
-                <!-- Mobile Menu Content -->
-                <div id="mobile-menu" class="md:hidden hidden pb-4">
-                    {% if user_stats %}
-                    <div class="flex flex-col space-y-4 mt-4">
-                        <div class="flex flex-col space-y-2">
-                            <div class="flex items-center bg-gray-100 px-4 py-2 rounded-lg">
-                                <i class="fas fa-wallet text-blue-500 mr-2"></i>
-                                <span class="text-gray-900 font-medium">₹{{ "%.2f"|format(user_stats.total_spent) }}</span>
-                            </div>
-                            <div class="flex items-center bg-gray-100 px-4 py-2 rounded-lg">
-                                <i class="fas fa-receipt text-blue-500 mr-2"></i>
-                                <span class="text-gray-900 font-medium">{{ user_stats.total_expenses }} expenses</span>
-                            </div>
-                        </div>
-    
-                        <a href="{{ url_for('add_expense') }}" 
-                           class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300 
-                                 text-center shadow-sm">
-                            <i class="fas fa-plus mr-2"></i> Add Expense
-                        </a>
-    
-                        <div class="border-t pt-4">
-                            <div class="flex items-center justify-between px-4">
-                                 
-                                <div class="flex items-center space-x-2">
-                                  <div>
-                                    <a href="{{ url_for('profile') }}"
-                                    <i class="fas fa-user-circle text-2xl text-blue-500"></i>
-                                    <span class="text-gray-900 font-medium">{{ user_stats.name }}</span>
-                                    </a>
-                                  </div>
-                                </div>
-                               
-                                
-                                <a href="{{ url_for('logout') }}" 
-                                   class="text-gray-600 hover:text-gray-900 flex items-center">
-                                    <i class="fas fa-sign-out-alt text-red-600 text-lg mr-2"></i>
-                                    <span class="text-red-600">Logout</span>
+                            <!-- Guest Menu -->
+                            <div class="flex items-center space-x-6">
+                                <a href="{{ url_for('login') }}" 
+                                   class="text-gray-700 hover:text-blue-600 px-4 py-2 rounded-lg transition duration-300 
+                                         font-medium hover:bg-blue-50">
+                                    Login
+                                </a>
+                                <a href="{{ url_for('register') }}" 
+                                   class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 
+                                          text-white px-6 py-2.5 rounded-xl transition-all duration-300 shadow-md 
+                                          hover:shadow-lg transform hover:-translate-y-0.5">
+                                    Register
                                 </a>
                             </div>
-                        </div>
+                        {% endif %}
                     </div>
-                    {% else %}
-                    <div class="flex flex-col space-y-2 mt-2">
-                        <a href="{{ url_for('login') }}" 
-                           class="text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-md font-medium">
-                            Login
-                        </a>
-                        <a href="{{ url_for('register') }}" 
-                           class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 
-                                 text-center shadow-sm">
-                            Register
-                        </a>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </nav>
         {% endif %}
     
-        <!-- Rest of your content remains the same -->
+        <!-- Rest of your content remains the same 
     
         
     
@@ -203,7 +156,7 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-
+-->
     <main class="flex-grow">
         {% block content %}{% endblock %}
     </main>
@@ -436,6 +389,53 @@ async function sendMessage(event) {
     document.getElementById('mobile-menu-button').addEventListener('click', function() {
         var mobileMenu = document.getElementById('mobile-menu');
         mobileMenu.classList.toggle('hidden');
+    });
+</script>
+
+<!-- Flash Messages -->
+<div id="flash-container" class="fixed top-4 right-4 z-50 space-y-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message px-4 py-3 rounded-lg shadow-lg text-white font-medium transition-all duration-300"
+                     data-category="{{ category }}"
+                     style="display: none;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+
+<script>
+    // Show flash messages with animation and auto-hide after 3 seconds
+    document.addEventListener('DOMContentLoaded', function () {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach((msg, index) => {
+            // Add category-based styling
+            const category = msg.getAttribute('data-category');
+            if (category === 'success') {
+                msg.classList.add('bg-green-500');
+            } else if (category === 'error') {
+                msg.classList.add('bg-red-500');
+            } else if (category === 'info') {
+                msg.classList.add('bg-blue-500');
+            } else {
+                msg.classList.add('bg-gray-500');
+            }
+
+            // Show the message with a fade-in effect
+            setTimeout(() => {
+                msg.style.display = 'block';
+                msg.style.opacity = 1;
+            }, index * 200); // Staggered animation for multiple messages
+
+            // Hide the message after 3 seconds
+            setTimeout(() => {
+                msg.style.opacity = 0;
+                setTimeout(() => msg.remove(), 300); // Remove the element after fade-out
+            }, 3000);
+        });
     });
 </script>
 
